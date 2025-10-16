@@ -1,0 +1,21 @@
+<div class="topbar">
+    <div class="brand">
+        <img class="logo" src="{{ " assets/ircc-logo.png" | relURL }}" alt="IRCC logo"
+            onerror="this.style.display='none'" />
+        <div>
+            <h1>IRCC — Incident Response Chaos Club</h1>
+            <div class="sub">incident response can be chaotic · irchaos.club</div>
+        </div>
+    </div>
+    <nav class="nav" aria-label="primary">
+        <a href="{{ .Site.BaseURL | relURL }}" {{ if .IsHome }}aria-current="page" {{ end }}>search</a>
+        <a href="{{ .Site.BaseURL | relURL }}/about/">about</a>
+        <select id="themePicker" class="select theme-select" title="Theme">
+            <option value="gruvbox-dark">Gruvbox Dark</option>
+            <option value="oxocarbon">Oxocarbon</option>
+            <option value="uwu">UwU (pink)</option>
+            <option value="solarized-dark">Solarized Dark</option>
+            <option value="github-dark">GitHub Dark</option>
+        </select>
+    </nav>
+</div>

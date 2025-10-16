@@ -1,0 +1,104 @@
+{{ define "main" }}
+<div class="crumbs">
+    <!-- go back to root website-->
+    <a href="{{ .Site.BaseURL }}">← back to search</a>
+    <span>·</span>
+    <span>post</span>
+</div>
+
+<div class="grid-post">
+    <!-- LEFT: TOC -->
+    <aside class="panel">
+        <div class="hd">outline</div>
+        <div class="bd toc" id="toc">
+            <ul></ul>
+        </div>
+    </aside>
+
+    <!-- CENTER: Article -->
+    <main class="panel">
+        <div class="hd">post</div>
+        <div class="bd">
+            <div class="eventHead">
+                <div>
+                    <h1 class="title">{{ .Title }}</h1>
+                    <div class="meta">
+                        <span class="pill" id="tz-pill">utc</span>
+                        <time id="postTime" class="dt" data-epoch="{{ .Date.Unix }}"
+                            datetime='{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}'>
+                            {{ (.Date.UTC).Format "2006-01-02" }}
+                        </time>
+                        {{ with .Params.authors }}<span>· by <strong>{{ delimit . ", " }}</strong></span>{{ end }}
+                        {{ with .Params.tags }}<span>· {{ range . }}<span class="tag">{{ . }}</span> {{ end }}</span>{{
+                        end }}
+                        <span>· {{ .ReadingTime }} min read</span>
+                    </div>
+                </div>
+                <div class="tool">
+                    {{ if isset .Params "external" }}
+                    <a class="dl" href="{{ .Params.external }}" target="_blank" rel="noopener">Open external post ↗</a>
+                    {{ else }}
+                    <a class="dl" href="{{ .Permalink }}">Permalink</a>
+                    {{ end }}
+                </div>
+            </div>
+
+            {{ if or .Params.query .Params.timerange }}
+            <div class="ribbon" aria-label="query">
+                <div class="label">query</div>
+                <div class="query"><span class="prompt">ircc@siem:$</span>
+                    <code>{{ .Params.query | default "—" }}</code>
+                </div>
+                <div class="label">time</div>
+                <div class="query"><code>{{ .Params.timerange | default "—" }}</code> <span
+                        style="margin-left:8px;color:var(--muted)">(UTC)</span></div>
+            </div>
+            {{ end }}
+
+            <article id="article">
+                {{ if isset .Params "external" }}
+                <p>This post lives elsewhere. Redirecting… <a href="{{ .Params.external }}">open now</a>.</p>
+                {{ else }}
+                {{ .Content }}
+                {{ end }}
+            </article>
+        </div>
+    </main>
+
+    <!-- RIGHT: meta -->
+    <aside class="panel">
+        <div class="hd">meta</div>
+        <div class="bd">
+            <div class="kv">
+                <div class="k">post id</div>
+                <div>{{ with .File }}{{ .UniqueID }}{{ else }}{{ md5 .RelPermalink }}{{ end }}</div>
+
+                <div class="k">author(s)</div>
+                <div>{{ with .Params.authors }}{{ delimit . ", " }}{{ end }}</div>
+
+                <div class="k">published</div>
+                <div>
+                    <time class="dt" data-epoch="{{ .Date.Unix }}"
+                        datetime='{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}'>
+                        {{ (.Date.UTC).Format "2006-01-02" }}
+                    </time>
+                </div>
+            </div>
+
+            {{ with .Params.files }}
+            <div class="files">
+                {{ range . }}
+                <div class="file">
+                    <div><strong>{{ .name }}</strong> <span class="ext">· {{ .type }}</span></div>
+                    <a class="dl" href="{{ .url }}">download</a>
+                </div>
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+    </aside>
+</div>
+
+{{- $js := resources.Get "js/post.js" | resources.Minify | resources.Fingerprint -}}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{ end }}

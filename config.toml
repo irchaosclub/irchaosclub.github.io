@@ -1,0 +1,16 @@
+baseURL = "http://localhost:1313/"
+languageCode = "en-us"
+title = "IRCC — Incident Response Chaos Club"
+theme = "ircc-siem-gruvbox"
+enableRobotsTXT = true
+enableEmoji = true
+
+[pagination]
+pagerSize = 20
+
+[taxonomies]
+tag = "tags"
+author = "authors"
+
+[params]
+description = "IRCC — DFIR research & posts."
