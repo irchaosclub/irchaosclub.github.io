@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "https://irchaos.club/"
 languageCode = "en-us"
 title = "IRCC — Incident Response Chaos Club"
 theme = "ircc-siem-gruvbox"
