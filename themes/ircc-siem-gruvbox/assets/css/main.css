@@ -1303,18 +1303,8 @@ select.select {
     background: var(--panel);
     border: 1px solid var(--edge);
     border-radius: 12px;
-    padding: 12px;
+    padding: 10px;
     align-items: center;
-}
-
-.author-card .avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #1a1b19;
-    /* fallback if no img */
-    flex: 0 0 auto;
 }
 
 .author-card .info {

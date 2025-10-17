@@ -24,21 +24,26 @@
                 <div>
                     <h1 class="title">{{ .Title }}</h1>
                     <div class="meta">
+                        {{ if not $hideMeta }}
                         <time id="postTime" class="dt" data-epoch="{{ .Date.Unix }}"
                             datetime='{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}'>
                             {{ (.Date.UTC).Format "2006-01-02" }}
                         </time>
+                        {{ end }}
+
                         {{ with .Params.authors }}<span>· by <strong>{{ delimit . ", " }}</strong></span>{{ end }}
                         {{ with .Params.tags }}<span>· {{ range . }}<span class="tag">{{ . }}</span> {{ end }}</span>{{
                         end }}
-                        {{ if not .Params.external }}
+
+                        {{ if and (not $hideMeta) (not .Params.external) }}
                         {{ $rt := .ReadingTime }}
                         {{ with .Params.readingTime }}{{ $rt = . }}{{ end }}
                         <span>· {{ $rt }} min read</span>
                         {{ end }}
-
                     </div>
                 </div>
+
+                {{ if not $hideMeta }}
                 <div class="tool">
                     {{ if isset .Params "external" }}
                     <a class="dl" href="{{ .Params.external }}" target="_blank" rel="noopener">Open external post ↗</a>
@@ -46,6 +51,7 @@
                     <a class="dl" href="{{ .Permalink }}">Permalink</a>
                     {{ end }}
                 </div>
+                {{ end }}
             </div>
 
             {{ if or .Params.query .Params.timerange }}
@@ -70,7 +76,6 @@
         </div>
     </main>
 
-    <!-- RIGHT: meta -->
     {{ if not $hideMeta }}
     <!-- RIGHT: meta -->
     <aside class="panel">

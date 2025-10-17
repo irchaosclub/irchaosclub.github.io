@@ -1,17 +1,12 @@
 ---
 hideMeta: true
+title: "About Us"
 ---
-
-## About us
-
-asd
-
-## Who we are
 
 <div class="author-cards">
   <article class="author-card">
     <div class="info">
-      <h3 class="name">Humpty/Tony</h3>
+      <h2 class="name">Humpty/Tony</h2>
       <div class="role">SOC Analyst • Malware reverse engineer</div>
       <p class="bio">
         Security analyst focused on detection, response, and malware reverse engineering. Shares research and experiments on Humpty’s RE Blog. Founder of IRCC.
