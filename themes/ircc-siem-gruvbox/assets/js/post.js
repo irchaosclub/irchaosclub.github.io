@@ -10,13 +10,6 @@
     }
 
 
-    function dateFromEpochAttr(el) {
-        const v = el?.getAttribute("data-epoch");
-        const n = Number(v);
-        if (!Number.isFinite(n)) return new Date(NaN);
-        return new Date(n * 1000);                        // seconds → ms
-    }
-
     function buildTOC() {
         const toc = $("#toc ul"); if (!toc) return;
         toc.innerHTML = "";

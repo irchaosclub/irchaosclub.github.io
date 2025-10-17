@@ -4,8 +4,8 @@ date: 2025-10-12T09:05:43Z
 authors: ["grepStrength"]
 tags: ["dfir","memory"]
 description: "Subtle memory artifacts that kick off useful DFIR pivots."
-query: 'process.name: "lsass.exe" AND (event.code: 10 OR event.code: 4688)'
-timerange: "2025-10-10..2025-10-12"
+# query: 'process.name: "lsass.exe" AND (event.code: 10 OR event.code: 4688)'
+# timerange: "2025-10-10..2025-10-12"
 ---
 
 Quick note‑dump on small memory signals that tend to kick off the right triage: orphaned threads, psxview inconsistencies, and quiet handles that show up in all the wrong places.

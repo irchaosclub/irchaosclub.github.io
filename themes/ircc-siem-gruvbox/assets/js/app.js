@@ -128,19 +128,24 @@
         const hayTitle = (p.title || "").toLowerCase();
         const hayAuthors = (p.authors || []).map(x => x.toLowerCase());
         const hayTags = (p.tags || []).map(x => x.toLowerCase());
-        const hayExcerpt = (p.excerpt || "").toLowerCase();
+        const hayExcerpt = (p.excerpt || "").toLowerCase(); // optional legacy
+        const hayDesc = (p.description || p.excerpt || "").toLowerCase(); // <— NEW
 
         if (q.tag.length && !q.tag.every(tg => hayTags.includes(tg))) return false;
         if (q.author.length && !q.author.every(a => hayAuthors.some(x => x.includes(a)))) return false;
         if (q.title.length && !q.title.every(s => hayTitle.includes(s))) return false;
+
         if (q.any.length && !q.any.every(w =>
             hayTitle.includes(w) ||
             hayAuthors.some(a => a.includes(w)) ||
             hayTags.some(tg => tg.includes(w)) ||
-            hayExcerpt.includes(w))) return false;
+            hayDesc.includes(w) ||             // <— NEW: checks front-matter description
+            hayExcerpt.includes(w)             // keep if you still emit excerpt
+        )) return false;
 
         return true;
     }
+
 
     function renderHistogram(posts) {
         const hist = $("#hist");
@@ -244,39 +249,30 @@
     }
 
     function renderDetails(p) {
-        const d = $("#details");
+        const d = document.getElementById("details");
         if (!d) return;
 
-        const excerptText = (p.excerpt || "").replace(/</g, "&lt;");
-        const isLong = excerptText.length > 450;
+        const text = (p.description || p.excerpt || "").trim();
+        const safe = text
+            ? text.replace(/</g, "&lt;")
+            : '<span style="color:var(--muted)">No description available.</span>';
 
         d.innerHTML = `
-      <h3>${p.title}</h3>
-      <div class="kv">
-        <div class="k">author</div><div>${(p.authors || []).join(", ")}</div>
-        <div class="k">tags</div><div class="tags">${(p.tags || []).map(t => `<span class="tag">${t}</span>`).join("")}</div>
-        <div class="k">type</div><div>${p.type}</div>
-      </div>
-      <div class="excerpt ${isLong ? "clamp" : ""}" id="ex">${excerptText}</div>
-      ${isLong ? `<button class="more" id="exMore" type="button" aria-expanded="false">Show more</button>` : ""}
-      <div style="margin-top:10px">
-        ${p.type === "external"
-                ? `<a class="dl" href="${p.link}" target="_blank" rel="noopener">Open external post ↗</a>`
-                : `<a class="dl" href="${p.link}">Open post</a>`}
-      </div>
-    `;
-
-        if (isLong) {
-            const ex = d.querySelector("#ex");
-            const btn = d.querySelector("#exMore");
-            btn.addEventListener("click", () => {
-                ex.classList.toggle("clamp");
-                const expanded = !ex.classList.contains("clamp");
-                btn.textContent = expanded ? "Show less" : "Show more";
-                btn.setAttribute("aria-expanded", String(expanded));
-            });
-        }
+    <h3>${escapeHtml(p.title || "")}</h3>
+    <div class="kv">
+      <div class="k">author</div><div>${(p.authors || []).join(", ")}</div>
+      <div class="k">tags</div><div class="tags">${(p.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>
+      <div class="k">type</div><div>${escapeHtml(p.type || "")}</div>
+    </div>
+    <div class="excerpt" id="ex">${safe}</div>
+    <div style="margin-top:10px">
+      ${p.type === "external"
+                ? `<a class="dl" href="${escapeHtml(p.link)}" target="_blank" rel="noopener">Open external post ↗</a>`
+                : `<a class="dl" href="${escapeHtml(p.link)}">Open post</a>`}
+    </div>
+  `;
     }
+
 
     function update() {
         const filtered = (window.POSTS || []).map(p => {
@@ -352,6 +348,27 @@
         const sel = $("#themePicker"); if (sel) sel.value = name;
     }
 
+    function wireFiltersDrawer() {
+        // create the floating "Filters" button
+        const fab = document.createElement('button');
+        fab.className = 'filters-fab';
+        fab.type = 'button';
+        fab.textContent = 'Filters';
+        document.body.appendChild(fab);
+
+        // simple overlay to close when tapping outside
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;display:none;background:rgba(0,0,0,.4);z-index:65;';
+        document.body.appendChild(overlay);
+
+        const open = () => { document.body.classList.add('filters-open'); overlay.style.display = 'block'; };
+        const close = () => { document.body.classList.remove('filters-open'); overlay.style.display = 'none'; };
+
+        fab.addEventListener('click', open);
+        overlay.addEventListener('click', close);
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    }
+
     function init() {
         const yy = $("#yy"); if (yy) yy.textContent = new Date().getFullYear();
         renderContributors();
@@ -377,6 +394,8 @@
         setupThemePicker();
         update();
         setResponsiveMode();
+
+        wireFiltersDrawer();
     }
 
     function setResponsiveMode() {

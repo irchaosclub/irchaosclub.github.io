@@ -110,7 +110,9 @@ html[data-theme="github-dark"] {
 
 html,
 body {
-    height: 100%
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -142,7 +144,7 @@ body::before {
 .app {
     margin: 0 auto;
     padding: 18px;
-    width: clamp(75vw, 92vw, 1600px)
+    width: clamp(75vw, 92vw, 1600px);
 }
 
 .topbar {
@@ -153,7 +155,9 @@ body::before {
     padding: 10px 14px;
     background: var(--bg-1);
     border: 1px solid var(--edge);
-    border-radius: 12px
+    border-radius: 12px;
+    flex-wrap: wrap;
+    /* allow wrap on narrow screens */
 }
 
 .brand {
@@ -240,7 +244,7 @@ body::before {
     padding: 12px
 }
 
-/* chips / tags (generic) */
+/* chips / tags */
 .chips {
     display: flex;
     flex-wrap: wrap;
@@ -279,7 +283,6 @@ body::before {
     border: 1px solid var(--edge);
     color: var(--ink);
     border-radius: 6px;
-    /* center & spacing */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -298,16 +301,14 @@ body::before {
 .pill {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
-    padding: 4px 10px;
+    padding: 2px 8px;
     border-radius: 999px;
     background: rgba(142, 192, 124, .12);
     border: 1px solid rgba(142, 192, 124, .3);
     color: var(--ink);
-    line-height: 1;
-    vertical-align: middle;
-    font-size: var(--fs-1);
+    font-size: 11px;
+    line-height: 1.1
 }
 
 .sev-ok {
@@ -340,8 +341,6 @@ body::before {
 }
 
 .facet .tag {
-    display: inline-flex;
-    align-items: center;
     padding: 6px 10px;
     border-radius: 8px;
     cursor: pointer
@@ -366,8 +365,6 @@ body::before {
     outline: 2px solid var(--accent);
     outline-offset: 2px
 }
-
-/* <<< */
 
 /* toolbar */
 .toolbar {
@@ -472,16 +469,15 @@ body::before {
 }
 
 .events td {
-    padding: 12px 12px;
+    padding: 10px;
     vertical-align: middle;
     overflow-wrap: anywhere;
     word-break: break-word;
-    line-height: 1.45;
-    background: var(--row);
+    line-height: 1.35;
+    background: var(--row)
 }
 
-
-/* draw a single dashed separator per row */
+/* dashed separator per row */
 .events tbody tr+tr td {
     border-top: 0
 }
@@ -514,21 +510,46 @@ td.col-time .ts {
 }
 
 td.col-time .pill {
-    display: none;
+    margin-right: .45rem;
+    font-size: 10px;
+    padding: 1px 6px
 }
 
-/* AUTHORS column */
+/* AUTHORS column — allow wrapping */
 td.col-authors {
-    white-space: nowrap;
-    overflow: hidden
+    white-space: normal;
+    /* let pills wrap */
+    overflow: visible;
+    /* table cells ignore overflow in many browsers anyway */
 }
 
-/* TITLE column (ONLY title + optional external pill) */
+/* spacing when wrapping to multiple lines */
+td.col-authors .pill {
+    margin-right: 6px;
+    margin-top: 4px;
+}
+
+/* TITLE column */
 td.col-title {
+    /* keep table-cell so vertical-align works */
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+/* flex only the inner wrapper */
+td.col-title .titlewrap {
     display: flex;
     align-items: center;
     gap: 8px;
-    overflow: hidden
+}
+
+td.col-title .titlewrap a {
+    flex: 1 1 auto;
+    min-width: 0;
+    /* allow ellipsis */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 td.col-title a {
@@ -546,8 +567,6 @@ td.col-title .pill:not(.sev-warn) {
     display: none !important;
 }
 
-/* keep only the external pill */
-
 /* TAGS column (left-aligned, clipped, max 3) */
 td.col-tags {
     white-space: nowrap;
@@ -555,12 +574,10 @@ td.col-tags {
     text-align: left
 }
 
-td.col-tags .tags-row,
-td.col-tags .row-tags {
+td.col-tags .tags-row {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    white-space: nowrap;
+    gap: 6px;
+    white-space: nowrap
 }
 
 td.col-tags .tag,
@@ -689,8 +706,11 @@ article a:hover,
     }
 }
 
+/* Phone layout */
 @media (max-width:720px) {
     .app {
+        width: 100%;
+        max-width: 100%;
         padding: 12px
     }
 
@@ -711,6 +731,21 @@ article a:hover,
     .theme-select {
         min-width: 0;
         width: 140px
+    }
+
+    /* toolbar stacks */
+    .toolbar {
+        grid-template-columns: 1fr;
+        gap: 8px
+    }
+
+    .qwrap {
+        grid-column: auto
+    }
+
+    .select,
+    .btn {
+        width: 100%
     }
 
     .hist {
@@ -779,6 +814,31 @@ article a:hover,
         text-overflow: unset
     }
 
+    .events td.col-time::before {
+        content: "Time"
+    }
+
+    .events td.col-authors::before {
+        content: "Author(s)"
+    }
+
+    .events td.col-tags::before {
+        content: "Tags"
+    }
+
+    .events td::before {
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-size: var(--fs-0);
+        flex: 0 0 auto;
+        min-width: 84px;
+    }
+
+    .resizer {
+        display: none !important
+    }
+
     .col-tags {
         flex-wrap: wrap
     }
@@ -786,42 +846,49 @@ article a:hover,
     .col-tags .tag {
         margin-top: 4px
     }
+
+    /* optional: tighter title on phones */
+    .title {
+        font-size: 24px;
+        line-height: 1.25
+    }
+
+    /* hide the right details panel on very small screens */
+    .right.panel {
+        display: none
+    }
 }
 
 /* ===================== POST PAGE ===================== */
-
-/* 3-column layout (Outline | Article | Meta) */
 .grid-post {
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr) 280px;
     gap: 16px;
 }
 
-/* Breadcrumbs above the post */
 .crumbs {
     display: flex;
     gap: 8px;
     align-items: center;
     color: var(--muted);
     margin: 14px 2px 10px;
-    flex-wrap: wrap;
+    flex-wrap: wrap
 }
 
 .crumbs a {
     color: var(--accent);
-    text-decoration: none;
+    text-decoration: none
 }
 
 .crumbs a:hover {
     color: var(--accent-2);
-    text-decoration: underline;
+    text-decoration: underline
 }
 
-/* Post header */
 .title {
     margin: 4px 0 4px;
     font-size: var(--fs-5);
-    line-height: 1.2;
+    line-height: 1.2
 }
 
 .meta {
@@ -829,13 +896,12 @@ article a:hover,
     flex-wrap: wrap;
     gap: 8px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 13px
 }
 
-/* Outline (left) */
 #toc {
     position: sticky;
-    top: 12px;
+    top: 12px
 }
 
 #toc ul {
@@ -844,7 +910,7 @@ article a:hover,
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 6px
 }
 
 #toc a {
@@ -855,20 +921,19 @@ article a:hover,
     border-radius: 8px;
     border: 1px solid var(--edge);
     background: var(--chip);
-    font-size: 12px;
+    font-size: 12px
 }
 
 #toc a.h3 {
     opacity: .85;
-    margin-left: 10px;
+    margin-left: 10px
 }
 
 #toc a:hover {
     background: rgba(142, 192, 124, .08);
-    border-color: #6b625a;
+    border-color: #6b625a
 }
 
-/* “Query/Time” ribbons or any info callouts */
 .ribbon {
     margin: 10px 0;
     display: grid;
@@ -884,7 +949,7 @@ article a:hover,
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: .18em;
-    font-size: var(--fs-0);
+    font-size: var(--fs-0)
 }
 
 .query {
@@ -896,32 +961,31 @@ article a:hover,
     border: 1px solid var(--edge);
     border-radius: 8px;
     white-space: nowrap;
-    overflow: auto;
+    overflow: auto
 }
 
-/* Article typography */
 #article h2 {
     margin: 24px 0 8px;
-    font-size: 20px;
+    font-size: 20px
 }
 
 #article h3 {
     margin: 18px 0 6px;
-    font-size: 16px;
+    font-size: 16px
 }
 
 #article p {
-    margin: 10px 0;
+    margin: 10px 0
 }
 
 #article a {
     color: var(--accent);
-    text-decoration: none;
+    text-decoration: none
 }
 
 #article a:hover {
     color: var(--accent-2);
-    text-decoration: underline;
+    text-decoration: underline
 }
 
 #article blockquote {
@@ -929,23 +993,58 @@ article a:hover,
     padding: 6px 10px;
     color: var(--muted);
     background: #222320;
-    border-radius: 6px;
+    border-radius: 6px
 }
 
 /* Code blocks + copy button */
+/* Code blocks + copy button — safe for mobile */
 #article pre,
-#article code {
-    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    background: #222320;
-    color: var(--ink);
-}
-
-#article pre {
+.post-body pre {
     position: relative;
     padding: 12px;
     border: 1px solid var(--edge);
     border-radius: 8px;
-    overflow: auto;
+    background: #222320;
+    color: var(--ink);
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+    max-width: 100%;
+    overflow-x: auto;
+    /* ✅ prevents horizontal layout breaks */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    white-space: pre;
+    /* preserve formatting */
+    word-wrap: normal;
+    word-break: normal;
+}
+
+/* Inner code inherits no-wrap */
+/* Code blocks + copy button — safe for mobile */
+#article pre,
+.post-body pre {
+    position: relative;
+    padding: 12px;
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    background: #222320;
+    color: var(--ink);
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+    /* key bits */
+    max-width: 100%;
+    overflow-x: auto;
+    /* scroll long lines */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    white-space: pre;
+    word-wrap: normal;
+    word-break: normal;
+}
+
+#article pre code,
+.post-body pre code {
+    white-space: inherit;
 }
 
 .copyBtn {
@@ -959,61 +1058,94 @@ article a:hover,
     border-radius: 6px;
     padding: 4px 8px;
     cursor: pointer;
+    z-index: 2;
 }
 
 .copyBtn:hover {
     border-color: #6b625a;
 }
 
+/* Hugo/Chroma wrapper fixes: make the wrapper the scroller */
+#article .highlight,
+#article .chroma {
+    max-width: 100%;
+    overflow-x: auto;
+    /* wrapper scrolls if needed */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Let the <pre> size to its content inside the scrolling wrapper */
+#article .highlight pre,
+#article .chroma pre {
+    display: inline-block;
+    min-width: 100%;
+    /* at least container width */
+    white-space: pre;
+}
+
+/* Chroma sometimes emits <span style="display:flex"> per line — override it */
+#article .highlight pre span[style*="display:flex"] {
+    display: block !important;
+}
+
+/* Belt-and-braces: the article container never expands the page width */
+#article {
+    overflow-x: hidden;
+}
+
+.grid-post>* {
+    min-width: 0;
+}
+
 /* Meta/kv grid in right panel */
 .grid-post aside.panel .kv {
     display: grid;
     grid-template-columns: minmax(8ch, max-content) 1fr;
-    column-gap: 8px;
+    column-gap: 8px
 }
 
 .grid-post aside.panel .kv .k {
     text-align: left;
-    white-space: nowrap;
+    white-space: nowrap
 }
 
-/* ====== responsive collapse for post page ====== */
+/* responsive collapse for post page */
 @media (max-width:1100px) {
     .grid-post {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
     }
 }
 
-/* --- Fix Meta panel overflow (right column on post page) --- */
+/* prevent overflow in right meta grid */
 .grid-post aside.panel .kv {
-    /* label column fits content; value column can shrink & wrap */
-    grid-template-columns: minmax(8ch, max-content) minmax(0, 1fr);
+    grid-template-columns: minmax(8ch, max-content) minmax(0, 1fr)
 }
 
 .grid-post aside.panel .kv>div {
-    min-width: 0;
-    /* allow grid children to shrink */
+    min-width: 0
 }
 
 .grid-post aside.panel .kv>div:not(.k) {
     overflow-wrap: anywhere;
-    /* wrap long tokens (hashes, ids, URLs) */
     word-break: break-word;
-    hyphens: auto;
+    hyphens: auto
 }
 
-/* Center pills & tags exactly */
-.pill,
-.tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    /* remove baseline sag */
-    padding: 3px 10px;
-    /* symmetric padding so text sits dead center */
-    vertical-align: middle;
-    /* align with neighbors */
+/* Media never overflow */
+#article img,
+#article video,
+.post-body img,
+.panel img {
+    max-width: 100%;
+    height: auto;
+    display: block
+}
+
+#article table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch
 }
 
 /* Prevent dropdown arrow clipping & keep spacing right */
@@ -1021,19 +1153,129 @@ select.select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-
     position: relative;
     line-height: 1.2;
     background-clip: padding-box;
-
     padding-right: 36px;
-    /* more room for the chevron & border radius */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a89984' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: 10px;
-    /* slightly smaller to avoid touching borders */
     background-position: right 10px center;
-
     overflow: visible;
-    /* don’t clip the SVG on some browsers */
+}
+
+/* Floating "Filters" button + drawer */
+.filters-fab {
+    position: fixed;
+    inset: auto 16px 16px auto;
+    z-index: 60;
+    background: var(--chip);
+    border: 1px solid var(--edge);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-size: var(--fs-1);
+    cursor: pointer;
+}
+
+@media (max-width:900px) {
+    .left.panel {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: min(92vw, 360px);
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        z-index: 70;
+    }
+
+    body.filters-open .left.panel {
+        transform: translateX(0)
+    }
+
+    body.filters-open::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .4);
+        z-index: 65;
+        pointer-events: none;
+    }
+
+    .filters-fab {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px
+    }
+}
+
+@media (min-width:901px) {
+    .filters-fab {
+        display: none
+    }
+}
+
+/* TOC on phones: wrap instead of one long horizontal row */
+@media (max-width: 720px) {
+    #toc {
+        position: static;
+    }
+
+    #toc ul {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        /* <-- key: allow multiple rows */
+        gap: 8px;
+        max-width: 100%;
+        overflow-x: visible;
+        /* no page-width push */
+    }
+
+    #toc a {
+        white-space: normal;
+        /* allow wrapping inside chips */
+        overflow-wrap: anywhere;
+        /* break long tokens */
+        word-break: break-word;
+        /* fallback */
+        hyphens: auto;
+        /* nicer hyphenation if allowed */
+    }
+}
+
+/* Landing page table should use full width on phones */
+@media (max-width: 720px) {
+
+    /* stop using table layout so column widths don't constrain it */
+    table.events {
+        display: block;
+        /* was table */
+        width: 100% !important;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    /* colgroup still in DOM? hide it so its widths can't apply */
+    table.events colgroup {
+        display: none !important;
+    }
+
+    /* card list */
+    table.events tbody {
+        display: grid;
+        /* you already had this—keep it */
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* each card */
+    table.events tbody tr {
+        width: 100%;
+        margin: 0;
+    }
 }
