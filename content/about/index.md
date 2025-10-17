@@ -3,6 +3,16 @@ hideMeta: true
 title: "About Us"
 ---
 
+At the Incident Response Chaos Club (IRCC), we embrace the chaos of cybersecurity. We’re a collective of curious minds united by a passion for digital forensics, incident response, and security research. Our mission is to learn, break, analyze, and share.
+
+We believe knowledge should flow freely. Through collaboration, experimentation, and community-driven learning, we aim to demystify cybersecurity and empower others to think critically, respond effectively, and defend creatively. Whether you’re a seasoned responder or a newcomer exploring DFIR for the first time, IRCC is a space to share insights, challenge ideas, and celebrate curiosity.
+
+The best defense begins with curiosity.
+
+---
+
+## Who we are
+
 <div class="author-cards">
   <article class="author-card">
     <div class="info">
@@ -40,6 +50,8 @@ title: "About Us"
     </div>
   </article>
 </div>
+
+---
 
 ## How you can publish
 

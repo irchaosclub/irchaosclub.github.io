@@ -32,7 +32,7 @@
 
     const state = {
         q: "",
-        range: "30",
+        range: "all",
         tagFilters: new Set(),
         authorFilters: new Set(),
         selId: null,
@@ -66,8 +66,9 @@
 
     function renderTagFacet(posts) {
         const counts = new Map();
-        const ranged = posts.filter(p => withinRange(toDate(p.time), state.range));
-        for (const p of ranged) for (const t of p.tags || []) counts.set(t, 1 + (counts.get(t) || 0));
+        const ranged = state.range === "all"
+            ? posts
+            : posts.filter(p => withinRange(toDate(p.time), state.range)); for (const p of ranged) for (const t of p.tags || []) counts.set(t, 1 + (counts.get(t) || 0));
 
         const items = [...counts.entries()].sort((a, b) => b[1] - a[1]);
         const wrap = $("#facet-tags");
@@ -373,14 +374,26 @@
         const yy = $("#yy"); if (yy) yy.textContent = new Date().getFullYear();
         renderContributors();
         renderTagFacet(window.POSTS || []);
+
         const q = $("#q");
         if (q) q.addEventListener("input", () => { state.q = q.value; update(); });
-        const range = $("#range");
-        if (range) range.addEventListener("change", e => { state.range = e.target.value; state.selId = null; update(); });
+
+        const rangeSel = $("#range");
+        if (rangeSel) {
+            rangeSel.value = "all";                 // visual default
+            state.range = rangeSel.value || "all";  // <-- ensure state matches the control now
+            rangeSel.addEventListener("change", e => {
+                state.range = e.target.value || "all";
+                state.selId = null;
+                update();
+            });
+        }
+
+
         const reset = $("#reset");
         if (reset) reset.addEventListener("click", () => {
             state.q = "";
-            state.range = $("#range")?.value || "30";
+            state.range = $("#range")?.value || "all";   // optional: make "all" the reset default too
             state.tzLocal = false;
             state.tagFilters = new Set();
             state.authorFilters = new Set();
@@ -394,9 +407,9 @@
         setupThemePicker();
         update();
         setResponsiveMode();
-
         wireFiltersDrawer();
     }
+
 
     function setResponsiveMode() {
         const isMobile = window.innerWidth <= 720;

@@ -496,7 +496,7 @@ body::before {
 
 /* TIME column */
 #col-time {
-    width: 22ch
+    width: 12ch
 }
 
 td.col-time {
@@ -533,7 +533,6 @@ td.col-authors .pill {
 td.col-title {
     /* keep table-cell so vertical-align works */
     vertical-align: middle;
-    overflow: hidden;
 }
 
 /* flex only the inner wrapper */
@@ -543,21 +542,17 @@ td.col-title .titlewrap {
     gap: 8px;
 }
 
-td.col-title .titlewrap a {
-    flex: 1 1 auto;
-    min-width: 0;
-    /* allow ellipsis */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
+td.col-title .titlewrap a,
 td.col-title a {
-    flex: 1 1 auto;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis
+    white-space: normal !important;
+    /* was nowrap */
+    overflow: visible;
+    /* let wrapped lines show */
+    text-overflow: clip;
+    /* no ellipsis while wrapping */
+    overflow-wrap: anywhere;
+    /* break long tokens if needed */
+    word-break: break-word;
 }
 
 /* hard guard: no tag chips under title */
@@ -569,9 +564,13 @@ td.col-title .pill:not(.sev-warn) {
 
 /* TAGS column (left-aligned, clipped, max 3) */
 td.col-tags {
-    white-space: nowrap;
-    overflow: hidden;
-    text-align: left
+    white-space: normal;
+    /* allow wrapping */
+    overflow: visible;
+    /* so wrapped lines aren’t clipped */
+    text-align: left;
+    vertical-align: top;
+    /* keeps the title from overlapping visually */
 }
 
 td.col-tags .tags-row {
@@ -584,6 +583,13 @@ td.col-tags .tag,
 td.col-tags .pill {
     flex: 0 0 auto;
     margin: 0
+}
+
+/* chips inside the tags column */
+td.col-tags .tag {
+    display: inline-flex;
+    margin: 0 6px 6px 0;
+    /* space between wrapped chips */
 }
 
 td.col-tags .tag:nth-child(n+4),
