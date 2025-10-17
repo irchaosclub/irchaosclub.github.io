@@ -1,106 +1,154 @@
 /* ===== Base palette (Gruvbox Dark as defaults) ===== */
+/* ===== Shared improvements ===== */
 :root {
-    --gb-bg0: #1d2021;
-    --gb-bg1: #282828;
-    --gb-bg2: #32302f;
-    --gb-bg3: #3c3836;
-    --gb-fg: #ebdbb2;
-    --gb-muted: #a89984;
-    --gb-red: #fb4934;
-    --gb-green: #b8bb26;
-    --gb-yellow: #fabd2f;
-    --gb-blue: #83a598;
-    --gb-purple: #d3869b;
-    --gb-aqua: #8ec07c;
-    --gb-orange: #fe8019;
+    /* Useful extras */
+    --link: var(--accent);
+    --link-hover: var(--accent-2);
+    --focus: color-mix(in oklab, var(--accent) 70%, white);
+    --selection: color-mix(in oklab, var(--accent) 25%, transparent);
+    --code-bg: color-mix(in oklab, var(--bg-0) 85%, black);
+    --code-edge: color-mix(in oklab, var(--edge) 80%, black);
 
-    --bg-0: var(--gb-bg0);
-    --bg-1: var(--gb-bg1);
-    --panel: var(--gb-bg2);
-    --edge: var(--gb-bg3);
-    --ink: var(--gb-fg);
-    --muted: var(--gb-muted);
-    --accent: var(--gb-aqua);
-    --accent-2: var(--gb-green);
-    --ok: var(--gb-green);
-    --warn: var(--gb-yellow);
-    --bad: var(--gb-red);
-    --chip: var(--gb-bg3);
-    --row: #2b2a28;
-
-    --fs-0: 12px;
-    --fs-1: 13px;
-    --fs-2: 16px;
-    --fs-3: 18px;
-    --fs-4: 22px;
-    --fs-5: 28px;
+    /* Make borders subtle & consistent */
+    --edge: color-mix(in oklab, var(--edge) 85%, var(--bg-0));
 }
 
-/* ===== Theme variants ===== */
-html[data-theme="gruvbox-dark"] {}
+/* ===== Gruvbox (keep, minor polish) ===== */
+html[data-theme="gruvbox-dark"] {
+    --bg-0: #1d2021;
+    --bg-1: #242726;
+    /* + subtle lift */
+    --panel: #2b2e2d;
+    --edge: #3a3d3c;
+    --ink: #ebdbb2;
+    --muted: #b3a78f;
+    --accent: #8ec07c;
+    /* aqua */
+    --accent-2: #b8bb26;
+    /* green */
+    --chip: #2b2e2d;
+    --row: #252624;
+}
 
+/* ===== Oxocarbon (less plastic, better contrast) ===== */
 html[data-theme="oxocarbon"] {
     --bg-0: #161616;
-    --bg-1: #262626;
-    --panel: #393939;
-    --edge: #525252;
-    --ink: #f2f4f8;
-    --muted: #dde1e6;
-    --accent: #08bdba;
-    --accent-2: #78a9ff;
+    --bg-1: #1e1e1e;
+    /* lift ~4–5% */
+    --panel: #262626;
+    --edge: #343434;
+    --ink: #e8ebf0;
+    /* softer than pure white */
+    --muted: #b8bec8;
+    --accent: #12bdb7;
+    /* slightly less neon */
+    --accent-2: #6aa6ff;
     --ok: #42be65;
-    --warn: #ee5396;
-    --bad: #3ddbd9;
-    --chip: #262626;
-    --row: #262626;
+    --warn: #ffb454;
+    /* warmer, clearer warning */
+    --bad: #ff6b6b;
+    --chip: #202020;
+    --row: #1c1c1c;
 }
 
+/* ===== “uwu” (was muddy → clearer steps & calmer accents) ===== */
 html[data-theme="uwu"] {
-    --bg-0: #2e2a31;
-    --bg-1: #4a464d;
-    --panel: #666369;
-    --edge: #838085;
-    --ink: #f5f4f7;
-    --muted: #9f9da2;
-    --accent: #d8137f;
-    --accent-2: #bb60ea;
-    --ok: #17ad98;
-    --warn: #dc8a0e;
-    --bad: #d8137f;
-    --chip: #4a464d;
-    --row: #4a464d;
+    --bg-0: #2b2730;
+    --bg-1: #35313a;
+    --panel: #3f3b44;
+    --edge: #4c4751;
+    --ink: #f2f1f4;
+    /* off-white */
+    --muted: #b0acb6;
+    --accent: #e05a9d;
+    /* less harsh magenta */
+    --accent-2: #b58af0;
+    /* lavender */
+    --ok: #21b79e;
+    --warn: #e2a64b;
+    --bad: #e05a9d;
+    --chip: #3a3540;
+    --row: #332f38;
 }
 
+/* ===== Solarized Dark (respect palette, fix brightness & steps) ===== */
+/* Solarized Dark — contrast boost */
+/* Solarized Dark — punchier contrast */
 html[data-theme="solarized-dark"] {
-    --bg-0: #002b36;
-    --bg-1: #073642;
-    --panel: #33515b;
-    --edge: #586e75;
-    --ink: #fdf6e3;
-    --muted: #93a1a1;
+    /* darker steps */
+    --bg-0: #00161b;
+    /* deeper than base03 */
+    --bg-1: #012028;
+    --panel: #072d38;
+    --edge: #264750;
+
+    /* brighter, warmer ink = more pop on cyan-ish bg */
+    --ink: #fff7e6;
+    /* near-white w/ warm tint */
+    --muted: #cfd7cf;
+    /* clearer secondary */
+
+    /* accents unchanged, but errors a touch brighter */
     --accent: #2aa198;
-    --accent-2: #859900;
-    --ok: #859900;
-    --warn: #b58900;
-    --bad: #dc322f;
-    --chip: #073642;
-    --row: #33515b;
+    --accent-2: #8fb400;
+    --ok: #8fb400;
+    --warn: #d8a100;
+    --bad: #ff5a4f;
+
+    --chip: #08323e;
+    --row: #0a3240;
 }
 
+/* ensure text actually uses the ink and reads crisply */
+html[data-theme="solarized-dark"] body {
+    color: var(--ink);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
+}
+
+/* ===== GitHub Dark (reduce muddiness, lift text, clearer rows) ===== */
 html[data-theme="github-dark"] {
     --bg-0: #0d1117;
-    --bg-1: #161b22;
+    --bg-1: #121821;
     --panel: #161b22;
-    --edge: #30363d;
-    --ink: #c9d1d9;
-    --muted: #8b949e;
-    --accent: #58a6ff;
-    --accent-2: #2ea043;
-    --ok: #2ea043;
-    --warn: #d29922;
-    --bad: #f85149;
-    --chip: #1f242c;
-    --row: #0f141a;
+    --edge: #2a313a;
+    --ink: #d5dbe3;
+    /* brighter text */
+    --muted: #9aa3ad;
+    --accent: #6aa8ff;
+    /* slightly lighter */
+    --accent-2: #3fbf63;
+    --ok: #3fbf63;
+    --warn: #e0ad3b;
+    --bad: #ff6e6a;
+    --chip: #1b212b;
+    --row: #121820;
+}
+
+/* ===== Suggested component hooks (optional) ===== */
+a {
+    color: var(--link);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+::selection {
+    background: var(--selection);
+}
+
+code,
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-edge);
 }
 
 /* ===== Base ===== */
@@ -292,11 +340,41 @@ body::before {
     font-size: var(--fs-1);
 }
 
+/* Landing page table: make tag chips small like author pills */
+.events td.col-tags .tag {
+    font-size: 11px;
+    /* match .pill */
+    line-height: 1.1;
+    /* match .pill */
+    padding: 2px 8px;
+    /* match .pill */
+    border-radius: 999px;
+}
+
 .tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px
 }
+
+/* TAGS column fixed width (in ch) */
+#col-tags {
+    width: calc(var(--tags-col-ch, 20) * 1ch);
+    /* default 20ch; overrideable */
+    max-width: calc(var(--tags-col-ch, 20) * 1ch);
+}
+
+/* Landing page table: make tag chips small like author pills */
+.events td.col-tags .tag {
+    font-size: 11px;
+    /* match .pill */
+    line-height: 1.1;
+    /* match .pill */
+    padding: 2px 8px;
+    /* match .pill */
+    border-radius: 999px;
+}
+
 
 .pill {
     display: inline-flex;

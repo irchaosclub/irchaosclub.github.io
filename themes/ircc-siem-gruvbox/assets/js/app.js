@@ -296,6 +296,11 @@
         const table = document.querySelector('table.events');
         if (!colAuthors || !colTags || !tbody || !table) return;
 
+        // NEW: if --tags-col-ch is set, let CSS own the tags width
+        const hasFixedTags = getComputedStyle(table)
+            .getPropertyValue('--tags-col-ch')
+            .trim() !== '';
+
         let maxAuthor = 0;
         tbody.querySelectorAll('td.col-authors .pill').forEach(p => {
             const w = Math.ceil(p.getBoundingClientRect().width);
@@ -326,6 +331,17 @@
 
         if (colAuthors) colAuthors.style.width = authorsW + 'px';
         if (colTags) colTags.style.width = tagsW + 'px';
+        if (colTitle) colTitle.style.width = '';
+
+        if (colAuthors) colAuthors.style.width = authorsW + 'px';
+
+        // Only set tags width from JS if no fixed width is declared
+        if (!hasFixedTags) {
+            colTags.style.width = tagsW + 'px';
+        } else {
+            colTags.style.width = ''; // let CSS rule apply
+        }
+
         if (colTitle) colTitle.style.width = '';
     }
 
