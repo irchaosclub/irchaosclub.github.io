@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{- $hideMeta := or .Params.hideMeta (eq .RelPermalink "/about/") -}}
 <div class="crumbs">
     <!-- go back to root website-->
     <a href="{{ .Site.BaseURL }}">← back to search</a>
@@ -6,7 +7,7 @@
     <span>post</span>
 </div>
 
-<div class="grid-post">
+<div class="grid-post{{ if $hideMeta }} no-meta{{ end }}">
     <!-- LEFT: TOC -->
     <aside class="panel">
         <div class="hd">outline</div>
@@ -23,7 +24,6 @@
                 <div>
                     <h1 class="title">{{ .Title }}</h1>
                     <div class="meta">
-                        <span class="pill" id="tz-pill">utc</span>
                         <time id="postTime" class="dt" data-epoch="{{ .Date.Unix }}"
                             datetime='{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}'>
                             {{ (.Date.UTC).Format "2006-01-02" }}
@@ -31,7 +31,12 @@
                         {{ with .Params.authors }}<span>· by <strong>{{ delimit . ", " }}</strong></span>{{ end }}
                         {{ with .Params.tags }}<span>· {{ range . }}<span class="tag">{{ . }}</span> {{ end }}</span>{{
                         end }}
-                        <span>· {{ .ReadingTime }} min read</span>
+                        {{ if not .Params.external }}
+                        {{ $rt := .ReadingTime }}
+                        {{ with .Params.readingTime }}{{ $rt = . }}{{ end }}
+                        <span>· {{ $rt }} min read</span>
+                        {{ end }}
+
                     </div>
                 </div>
                 <div class="tool">
@@ -66,6 +71,8 @@
     </main>
 
     <!-- RIGHT: meta -->
+    {{ if not $hideMeta }}
+    <!-- RIGHT: meta -->
     <aside class="panel">
         <div class="hd">meta</div>
         <div class="bd">
@@ -97,6 +104,8 @@
             {{ end }}
         </div>
     </aside>
+    {{ end }}
+
 </div>
 
 {{- $js := resources.Get "js/post.js" | resources.Minify | resources.Fingerprint -}}

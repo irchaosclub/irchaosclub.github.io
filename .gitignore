@@ -1,7 +1,8 @@
 # --- Hugo ---
-/public/                 # Hugo output (don't commit if Pages builds for you)
-/resources/              # Hugo resource cache (images, SASS, etc.)
-/resources/_gen/         # Generated resources
+public/*
+public/
+resources/*              # Hugo resource cache (images, SASS, etc.)
+resources/
 /.hugo_build.lock
 hugo_stats.json          # From Hugo Pipes/Tailwind integration
 

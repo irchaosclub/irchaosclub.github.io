@@ -14,3 +14,6 @@ author = "authors"
 
 [params]
 description = "IRCC — DFIR research & posts."
+
+[markup.goldmark.renderer]
+unsafe = true
