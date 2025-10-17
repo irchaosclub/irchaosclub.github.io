@@ -11,6 +11,33 @@
         return y + "-" + pad(m) + "-" + pad(day);
     }
 
+    // Nudge the FAB up when the footer is on screen
+    function preventFabOverFooter(fab) {
+        const footer = document.querySelector('.foot');
+        if (!fab || !footer) return;
+
+        const BASE = 16; // normal bottom gap
+
+        const update = () => {
+            // how much of the footer is intruding into the viewport
+            const fr = footer.getBoundingClientRect();
+            const overlap = Math.max(0, window.innerHeight - fr.top);
+            // push the FAB up by the overlap, plus our base gap
+            const bottomPx = (overlap > 0 ? overlap + BASE : BASE);
+            fab.style.setProperty('--fab-bottom', `${bottomPx}px`);
+        };
+
+        // run on load/scroll/resize (passive for scroll perf)
+        update();
+        window.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+
+        // also react when the footer merely starts to appear
+        const io = new IntersectionObserver(update, { threshold: [0, 1] });
+        io.observe(footer);
+    }
+
+
     function withinRange(d, range) {
         if (range === "all") return true;
         const days = parseInt(range, 10);
@@ -366,25 +393,49 @@
     }
 
     function wireFiltersDrawer() {
-        // create the floating "Filters" button
+        // Floating toggle
         const fab = document.createElement('button');
         fab.className = 'filters-fab';
         fab.type = 'button';
         fab.textContent = 'Filters';
+        fab.setAttribute('aria-expanded', 'false');
         document.body.appendChild(fab);
+        preventFabOverFooter(fab);
 
-        // simple overlay to close when tapping outside
+        // Click-to-close overlay
         const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;display:none;background:rgba(0,0,0,.4);z-index:65;';
+        overlay.className = 'filters-overlay';
         document.body.appendChild(overlay);
 
-        const open = () => { document.body.classList.add('filters-open'); overlay.style.display = 'block'; };
-        const close = () => { document.body.classList.remove('filters-open'); overlay.style.display = 'none'; };
+        const open = () => {
+            document.body.classList.add('filters-open');
+            fab.textContent = 'Close';
+            fab.setAttribute('aria-expanded', 'true');
+            overlay.style.display = 'block';
+        };
 
-        fab.addEventListener('click', open);
+        const close = () => {
+            document.body.classList.remove('filters-open');
+            fab.textContent = 'Filters';
+            fab.setAttribute('aria-expanded', 'false');
+            overlay.style.display = 'none';
+        };
+
+        fab.addEventListener('click', () => {
+            if (document.body.classList.contains('filters-open')) close();
+            else open();
+        });
         overlay.addEventListener('click', close);
         window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+        // If they resize up to desktop, auto-close the drawer
+        const mq = window.matchMedia('(min-width: 901px)');
+        const handle = () => { if (mq.matches) close(); };
+        if (mq.addEventListener) mq.addEventListener('change', handle);
+        else mq.addListener(handle); // older Safari
     }
+
+
 
     function init() {
         const yy = $("#yy"); if (yy) yy.textContent = new Date().getFullYear();

@@ -855,7 +855,7 @@ article a:hover,
 
     .events tbody {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 10px;
         padding: 10px
     }
@@ -882,6 +882,39 @@ article a:hover,
         padding: 0;
         border: 0;
         background: transparent
+    }
+
+    /* prevent horizontal overflow inside cards */
+    .events td {
+        min-width: 0;
+        /* allow the cell to shrink */
+        max-width: 100%;
+        overflow: hidden;
+        /* guardrail */
+    }
+
+    .events td>* {
+        min-width: 0;
+        /* let content shrink */
+        flex: 1 1 0;
+    }
+
+    .events td.col-title a {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .events td.col-authors,
+    .events td.col-tags {
+        flex-wrap: wrap;
+    }
+
+    .events td .tag,
+    .events td .pill {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
 
     .events td.col-title {
@@ -1249,10 +1282,16 @@ select.select {
 }
 
 /* Floating "Filters" button + drawer */
+/* Floating "Filters" button + drawer */
 .filters-fab {
     position: fixed;
-    inset: auto 16px 16px auto;
-    z-index: 60;
+    right: 16px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--fab-bottom, 16px));
+    /* explicit top/left to override any previous 'inset' */
+    top: auto;
+    left: auto;
+
+    z-index: 100;
     background: var(--chip);
     border: 1px solid var(--edge);
     color: var(--ink);
@@ -1260,6 +1299,46 @@ select.select {
     padding: 10px 14px;
     font-size: var(--fs-1);
     cursor: pointer;
+}
+
+/* Style the in-drawer close button (mobile only) */
+/* Hide the inline close button on desktop */
+.filters-close {
+    display: none;
+}
+
+/* Show & align it on mobile, centered vertically in the header */
+@media (max-width: 900px) {
+    .left.panel .hd {
+        display: flex;
+        align-items: center;
+    }
+
+    .left.panel .filters-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        margin-left: auto;
+        /* push to the right edge of the header */
+        background: var(--chip);
+        border: 1px solid var(--edge);
+        border-radius: 8px;
+        color: var(--muted);
+        /* SVG picks this via currentColor */
+        cursor: pointer;
+    }
+
+    .left.panel .filters-close:hover {
+        border-color: #6b625a;
+        color: var(--ink);
+    }
+
+    /* keep the FAB tappable while overlay is up */
+    .filters-fab {
+        z-index: 100;
+    }
 }
 
 @media (max-width:900px) {
@@ -1276,15 +1355,6 @@ select.select {
 
     body.filters-open .left.panel {
         transform: translateX(0)
-    }
-
-    body.filters-open::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, .4);
-        z-index: 65;
-        pointer-events: none;
     }
 
     .filters-fab {
@@ -1440,4 +1510,27 @@ select.select {
     width: 14px;
     height: 14px;
     flex: 0 0 auto;
+}
+
+/* Selected row — subtle tint + thin outline */
+.events tbody tr.sel {
+    /* faint background tint */
+    background-color: color-mix(in oklab, var(--row) 94%, var(--accent) 6%);
+    /* discrete 1px inner outline */
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
+}
+
+/* Cells have their own background; let the row tint show through */
+.events tbody tr.sel td {
+    background: transparent;
+}
+
+/* Mobile card variant: slightly stronger so it reads against the card border */
+@media (max-width:720px) {
+    .events tbody tr.sel {
+        background-color: color-mix(in oklab, var(--row) 92%, var(--accent) 8%);
+        border-color: color-mix(in oklab, var(--accent) 40%, var(--edge));
+        outline: 0;
+        /* keep it clean on cards */
+    }
 }
