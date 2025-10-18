@@ -1,60 +1,64 @@
 (function () {
-    const $ = s => document.querySelector(s);
-    const $$ = s => [...document.querySelectorAll(s)];
-    const pad = n => n < 10 ? "0" + n : "" + n;
-    function fmt(d, local) {
-        if (!(d instanceof Date) || isNaN(d)) return "—";
-        return local
-            ? (d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()))
-            : (d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()));
-    }
+    // ---------- utils ----------
+    const $ = (s, el = document) => el.querySelector(s);
+    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+    const slug = s => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
-
+    // ---------- TOC ----------
     function buildTOC() {
-        const toc = $("#toc ul"); if (!toc) return;
-        toc.innerHTML = "";
+        const list = $("#toc ul");
+        if (!list) return;
+
+        const frag = document.createDocumentFragment();
         $$("#article h2, #article h3").forEach(h => {
-            if (!h.id) { h.id = h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
+            if (!h.id) h.id = slug(h.textContent);
             const li = document.createElement("li");
             const a = document.createElement("a");
-            a.href = "#" + h.id;
+            a.href = `#${h.id}`;
             a.textContent = h.textContent;
             if (h.tagName === "H3") a.className = "h3";
             li.appendChild(a);
-            toc.appendChild(li);
+            frag.appendChild(li);
         });
+
+        list.replaceChildren(frag);
     }
 
+    // ---------- copy buttons (delegated) ----------
     function wireCopy() {
-        $$(".copyBtn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const code = btn.nextElementSibling?.textContent || "";
-                navigator.clipboard.writeText(code).then(() => {
-                    const old = btn.textContent; btn.textContent = "copied"; setTimeout(() => btn.textContent = old, 900);
-                });
-            });
+        document.addEventListener("click", async e => {
+            const btn = e.target.closest(".copyBtn");
+            if (!btn) return;
+            const code = btn.nextElementSibling?.textContent || "";
+            try {
+                await navigator.clipboard.writeText(code);
+                const old = btn.textContent;
+                btn.textContent = "copied";
+                setTimeout(() => (btn.textContent = old), 900);
+            } catch { }
         });
     }
 
-
+    // ---------- theme ----------
+    const THEME_KEY = "irccTheme";
     function applyTheme(name) {
         document.documentElement.dataset.theme = name;
-        try { localStorage.setItem("irccTheme", name); } catch (e) { /* noop */ }
-        const sel = document.getElementById("themePicker");
-        if (sel) sel.value = name;
+        try { localStorage.setItem(THEME_KEY, name); } catch { }
+        const sel = $("#themePicker"); if (sel) sel.value = name;
     }
-
     function setupThemePicker() {
-        const sel = document.getElementById("themePicker");
+        const sel = $("#themePicker");
         if (!sel) return;
         sel.addEventListener("change", e => applyTheme(e.target.value));
-        let t = "gruvbox-dark";
-        try { t = localStorage.getItem("irccTheme") || t; } catch (e) { }
-        applyTheme(t);
+        const saved = (() => { try { return localStorage.getItem(THEME_KEY); } catch { return null; } })();
+        applyTheme(saved || "gruvbox-dark");
     }
 
+    // ---------- init ----------
     document.addEventListener("DOMContentLoaded", () => {
-        const yy = document.getElementById("yy"); if (yy) yy.textContent = new Date().getFullYear();
-        buildTOC(); wireCopy(); setupThemePicker();
+        const yy = $("#yy"); if (yy) yy.textContent = new Date().getFullYear();
+        buildTOC();
+        wireCopy();
+        setupThemePicker();
     });
 })();

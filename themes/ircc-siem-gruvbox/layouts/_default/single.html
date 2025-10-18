@@ -18,7 +18,9 @@
 
     <!-- CENTER: Article -->
     <main class="panel">
-        <div class="hd">post</div>
+        {{ if eq .Type "post" }}
+        <div class="label">{{ .Type | humanize }}</div>
+        {{ end }}
         <div class="bd">
             <div class="eventHead">
                 <div>

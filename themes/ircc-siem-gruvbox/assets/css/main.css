@@ -1,69 +1,56 @@
-/* ===== Base palette (Gruvbox Dark as defaults) ===== */
-/* ===== Shared improvements ===== */
+/* ===== tokens ===== */
 :root {
-    /* Useful extras */
     --link: var(--accent);
     --link-hover: var(--accent-2);
     --focus: color-mix(in oklab, var(--accent) 70%, white);
     --selection: color-mix(in oklab, var(--accent) 25%, transparent);
     --code-bg: color-mix(in oklab, var(--bg-0) 85%, black);
     --code-edge: color-mix(in oklab, var(--edge) 80%, black);
-
-    /* Make borders subtle & consistent */
     --edge: color-mix(in oklab, var(--edge) 85%, var(--bg-0));
 }
 
-/* ===== Gruvbox (keep, minor polish) ===== */
+/* ===== themes ===== */
 html[data-theme="gruvbox-dark"] {
     --bg-0: #1d2021;
     --bg-1: #242726;
-    /* + subtle lift */
     --panel: #2b2e2d;
     --edge: #3a3d3c;
     --ink: #ebdbb2;
     --muted: #b3a78f;
     --accent: #8ec07c;
-    /* aqua */
     --accent-2: #b8bb26;
-    /* green */
     --chip: #2b2e2d;
     --row: #252624;
+    --ok: #b8bb26;
+    --warn: #fabd2f;
+    --bad: #fb4934;
 }
 
-/* ===== Oxocarbon (less plastic, better contrast) ===== */
 html[data-theme="oxocarbon"] {
     --bg-0: #161616;
     --bg-1: #1e1e1e;
-    /* lift ~4–5% */
     --panel: #262626;
     --edge: #343434;
     --ink: #e8ebf0;
-    /* softer than pure white */
     --muted: #b8bec8;
     --accent: #12bdb7;
-    /* slightly less neon */
     --accent-2: #6aa6ff;
     --ok: #42be65;
     --warn: #ffb454;
-    /* warmer, clearer warning */
     --bad: #ff6b6b;
     --chip: #202020;
     --row: #1c1c1c;
 }
 
-/* ===== “uwu” (was muddy → clearer steps & calmer accents) ===== */
 html[data-theme="uwu"] {
     --bg-0: #2b2730;
     --bg-1: #35313a;
     --panel: #3f3b44;
     --edge: #4c4751;
     --ink: #f2f1f4;
-    /* off-white */
     --muted: #b0acb6;
     --accent: #e05a9d;
-    /* less harsh magenta */
     --accent-2: #b58af0;
-    /* lavender */
     --ok: #21b79e;
     --warn: #e2a64b;
     --bad: #e05a9d;
@@ -71,54 +58,30 @@ html[data-theme="uwu"] {
     --row: #332f38;
 }
 
-/* ===== Solarized Dark (respect palette, fix brightness & steps) ===== */
-/* Solarized Dark — contrast boost */
-/* Solarized Dark — punchier contrast */
 html[data-theme="solarized-dark"] {
-    /* darker steps */
     --bg-0: #00161b;
-    /* deeper than base03 */
     --bg-1: #012028;
     --panel: #072d38;
     --edge: #264750;
-
-    /* brighter, warmer ink = more pop on cyan-ish bg */
     --ink: #fff7e6;
-    /* near-white w/ warm tint */
     --muted: #cfd7cf;
-    /* clearer secondary */
-
-    /* accents unchanged, but errors a touch brighter */
     --accent: #2aa198;
     --accent-2: #8fb400;
     --ok: #8fb400;
     --warn: #d8a100;
     --bad: #ff5a4f;
-
     --chip: #08323e;
     --row: #0a3240;
 }
 
-/* ensure text actually uses the ink and reads crisply */
-html[data-theme="solarized-dark"] body {
-    color: var(--ink);
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.55;
-}
-
-/* ===== GitHub Dark (reduce muddiness, lift text, clearer rows) ===== */
 html[data-theme="github-dark"] {
     --bg-0: #0d1117;
     --bg-1: #121821;
     --panel: #161b22;
     --edge: #2a313a;
     --ink: #d5dbe3;
-    /* brighter text */
     --muted: #9aa3ad;
     --accent: #6aa8ff;
-    /* slightly lighter */
     --accent-2: #3fbf63;
     --ok: #3fbf63;
     --warn: #e0ad3b;
@@ -127,31 +90,7 @@ html[data-theme="github-dark"] {
     --row: #121820;
 }
 
-/* ===== Suggested component hooks (optional) ===== */
-a {
-    color: var(--link);
-}
-
-a:hover {
-    color: var(--link-hover);
-}
-
-:focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-}
-
-::selection {
-    background: var(--selection);
-}
-
-code,
-pre {
-    background: var(--code-bg);
-    border: 1px solid var(--code-edge);
-}
-
-/* ===== Base ===== */
+/* ===== base ===== */
 * {
     box-sizing: border-box
 }
@@ -160,21 +99,25 @@ html,
 body {
     height: 100%;
     width: 100%;
-    overflow-x: hidden;
+    overflow-x: hidden
 }
 
 body {
     margin: 0;
     color: var(--ink);
     background:
-        linear-gradient(0deg, transparent 24%, rgba(235, 219, 178, .04) 25%, rgba(235, 219, 178, .04) 26%, transparent 27%, transparent 74%, rgba(235, 219, 178, .04) 75%, rgba(235, 219, 178, .04) 76%, transparent 77%),
-        linear-gradient(90deg, transparent 24%, rgba(235, 219, 178, .035) 25%, rgba(235, 219, 178, .035) 26%, transparent 27%, transparent 74%, rgba(235, 219, 178, .035) 75%, rgba(235, 219, 178, .035) 76%, transparent 77%),
+        linear-gradient(0deg, transparent 24%, rgba(235, 219, 178, .04) 25% 26%, transparent 27% 74%, rgba(235, 219, 178, .04) 75% 76%, transparent 77%),
+        linear-gradient(90deg, transparent 24%, rgba(235, 219, 178, .035) 25% 26%, transparent 27% 74%, rgba(235, 219, 178, .035) 75% 76%, transparent 77%),
         radial-gradient(1200px 720px at 12% -10%, rgba(255, 255, 255, .05) 0%, transparent 55%),
         radial-gradient(900px 600px at 120% 12%, rgba(255, 255, 255, .04) 0%, transparent 55%),
         var(--bg-0);
     background-size: 32px 32px, 32px 32px, auto, auto, auto;
     font: 14px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
     letter-spacing: .01em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.55;
 }
 
 body::before {
@@ -182,17 +125,42 @@ body::before {
     position: fixed;
     inset: 0;
     pointer-events: none;
+    opacity: .9;
+    mix-blend-mode: overlay;
     background: radial-gradient(1600px 1000px at -20% -20%, rgba(235, 219, 178, .04), transparent 60%),
         repeating-linear-gradient(0deg, rgba(235, 219, 178, .03) 0 1px, transparent 1px 2px);
-    mix-blend-mode: overlay;
-    opacity: .9;
 }
 
-/* Layout */
+a {
+    color: var(--link);
+    text-decoration: none
+}
+
+a:hover {
+    color: var(--link-hover);
+    text-decoration: underline
+}
+
+:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px
+}
+
+::selection {
+    background: var(--selection)
+}
+
+code,
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-edge)
+}
+
+/* ===== layout ===== */
 .app {
     margin: 0 auto;
     padding: 18px;
-    width: clamp(75vw, 92vw, 1600px);
+    width: clamp(75vw, 92vw, 1600px)
 }
 
 .topbar {
@@ -204,8 +172,7 @@ body::before {
     background: var(--bg-1);
     border: 1px solid var(--edge);
     border-radius: 12px;
-    flex-wrap: wrap;
-    /* allow wrap on narrow screens */
+    flex-wrap: wrap
 }
 
 .brand {
@@ -245,7 +212,6 @@ body::before {
 
 .nav a {
     color: var(--muted);
-    text-decoration: none;
     font-size: 12px;
     letter-spacing: .12em;
     text-transform: uppercase;
@@ -255,7 +221,7 @@ body::before {
 
 .nav a:hover {
     color: var(--ink);
-    background: rgba(142, 192, 124, .12)
+    background: color-mix(in oklab, var(--accent) 12%, transparent)
 }
 
 .theme-select {
@@ -281,10 +247,9 @@ body::before {
     justify-content: space-between;
     padding: 10px 12px;
     border-bottom: 1px solid var(--edge);
-    font-weight: 700;
+    font: 700 12px/1 ui-sans-serif;
     letter-spacing: .12em;
     text-transform: uppercase;
-    font-size: 12px;
     color: var(--muted)
 }
 
@@ -292,24 +257,27 @@ body::before {
     padding: 12px
 }
 
-/* chips / tags */
-.chips {
+/* chips / tags / pills */
+.chips,
+.tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px
 }
 
-.chip {
+.tag,
+.chip,
+.details .more,
+.copyBtn,
+.author-card .links a {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     background: var(--chip);
     border: 1px solid var(--edge);
     color: var(--ink);
-    padding: 6px 10px;
     border-radius: 999px;
-    cursor: pointer;
-    user-select: none;
+    padding: 6px 10px;
     font-size: 12px
 }
 
@@ -318,63 +286,20 @@ body::before {
     height: 8px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 0 2px rgba(142, 192, 124, .15)
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 15%, transparent)
 }
 
 .chip.active {
-    outline: 2px solid rgba(142, 192, 124, .35);
-    background: rgba(142, 192, 124, .08)
+    outline: 2px solid color-mix(in oklab, var(--accent) 35%, transparent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent)
 }
 
-.tag {
-    background: var(--chip);
-    border: 1px solid var(--edge);
-    color: var(--ink);
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 10px;
-    line-height: 1;
-    vertical-align: middle;
-    font-size: var(--fs-1);
-}
-
-/* Landing page table: make tag chips small like author pills */
 .events td.col-tags .tag {
     font-size: 11px;
-    /* match .pill */
     line-height: 1.1;
-    /* match .pill */
     padding: 2px 8px;
-    /* match .pill */
-    border-radius: 999px;
+    border-radius: 999px
 }
-
-.tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px
-}
-
-/* TAGS column fixed width (in ch) */
-#col-tags {
-    width: calc(var(--tags-col-ch, 20) * 1ch);
-    /* default 20ch; overrideable */
-    max-width: calc(var(--tags-col-ch, 20) * 1ch);
-}
-
-/* Landing page table: make tag chips small like author pills */
-.events td.col-tags .tag {
-    font-size: 11px;
-    /* match .pill */
-    line-height: 1.1;
-    /* match .pill */
-    padding: 2px 8px;
-    /* match .pill */
-    border-radius: 999px;
-}
-
 
 .pill {
     display: inline-flex;
@@ -382,29 +307,29 @@ body::before {
     gap: 6px;
     padding: 2px 8px;
     border-radius: 999px;
-    background: rgba(142, 192, 124, .12);
-    border: 1px solid rgba(142, 192, 124, .3);
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
     color: var(--ink);
     font-size: 11px;
     line-height: 1.1
 }
 
 .sev-ok {
-    background: rgba(184, 187, 38, .12);
-    border-color: rgba(184, 187, 38, .35)
+    background: color-mix(in oklab, var(--ok) 12%, transparent);
+    border-color: color-mix(in oklab, var(--ok) 35%, transparent)
 }
 
 .sev-warn {
-    background: rgba(250, 189, 47, .12);
-    border-color: rgba(250, 189, 47, .35)
+    background: color-mix(in oklab, var(--warn) 12%, transparent);
+    border-color: color-mix(in oklab, var(--warn) 35%, transparent)
 }
 
 .sev-bad {
-    background: rgba(251, 73, 52, .12);
-    border-color: rgba(251, 73, 52, .35)
+    background: color-mix(in oklab, var(--bad) 12%, transparent);
+    border-color: color-mix(in oklab, var(--bad) 35%, transparent)
 }
 
-/* >>> Tag facet (left sidebar) */
+/* left facet */
 .facet {
     display: flex;
     flex-direction: column;
@@ -419,15 +344,13 @@ body::before {
 }
 
 .facet .tag {
-    padding: 6px 10px;
     border-radius: 8px;
     cursor: pointer
 }
 
 .facet .ct {
     color: var(--muted);
-    font-size: 12px;
-    flex: 0 0 auto
+    font-size: 12px
 }
 
 .facet .tag:hover {
@@ -435,13 +358,8 @@ body::before {
 }
 
 .facet .tag.active {
-    outline: 2px solid rgba(184, 187, 38, .35);
-    background: rgba(184, 187, 38, .08)
-}
-
-.facet .tag:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px
+    outline: 2px solid color-mix(in oklab, var(--ok) 35%, transparent);
+    background: color-mix(in oklab, var(--ok) 8%, transparent)
 }
 
 /* toolbar */
@@ -454,14 +372,17 @@ body::before {
     border-bottom: 1px solid var(--edge)
 }
 
-.qwrap {
+.qwrap,
+.btn,
+.select {
     display: flex;
     align-items: center;
     gap: 8px;
     background: #222320;
     border: 1px solid var(--edge);
     border-radius: 8px;
-    padding: 8px 10px
+    padding: 8px 10px;
+    color: var(--ink)
 }
 
 .prompt {
@@ -476,18 +397,11 @@ body::before {
     width: 100%
 }
 
-.btn,
-.select {
-    background: #222320;
-    border: 1px solid var(--edge);
-    border-radius: 8px;
-    padding: 8px 10px;
-    color: var(--ink);
-    font-size: 12px
-}
-
 .btn:hover,
-.select:hover {
+.select:hover,
+.details .more:hover,
+.copyBtn:hover,
+.author-card .links a:hover {
     border-color: #6b625a
 }
 
@@ -504,8 +418,8 @@ body::before {
 .bar {
     flex: 1 1 0;
     min-width: 2px;
-    background: linear-gradient(180deg, rgba(142, 192, 124, .9), rgba(131, 165, 152, .25));
-    border: 1px solid rgba(131, 165, 152, .45);
+    background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 90%, transparent), color-mix(in oklab, var(--accent) 25%, transparent));
+    border: 1px solid color-mix(in oklab, var(--accent) 45%, transparent);
     border-radius: 4px 4px 0 0
 }
 
@@ -535,32 +449,14 @@ body::before {
     border-bottom: 1px solid var(--edge);
     color: var(--muted);
     text-align: left;
-    font-weight: 600;
+    font: 600 11px/1 ui-sans-serif;
     letter-spacing: .08em;
     text-transform: uppercase;
-    font-size: 11px;
     padding: 8px 10px
 }
 
 .events tbody tr {
-    background: var(--row)
-}
-
-.events td {
-    padding: 10px;
-    vertical-align: middle;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    line-height: 1.35;
-    background: var(--row)
-}
-
-/* dashed separator per row */
-.events tbody tr+tr td {
-    border-top: 0
-}
-
-.events tbody tr {
+    background: var(--row);
     position: static;
     background-image: repeating-linear-gradient(to right, var(--edge) 0 6px, transparent 6px 14px);
     background-size: 100% 1px;
@@ -572,7 +468,24 @@ body::before {
     background-image: none
 }
 
-/* TIME column */
+.events td {
+    padding: 10px;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+    background: var(--row)
+}
+
+.events tbody tr.sel {
+    background-color: color-mix(in oklab, var(--row) 94%, var(--accent) 6%);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent)
+}
+
+.events tbody tr+tr td {
+    border-top: 0
+}
+
 #col-time {
     width: 12ch
 }
@@ -593,62 +506,41 @@ td.col-time .pill {
     padding: 1px 6px
 }
 
-/* AUTHORS column — allow wrapping */
 td.col-authors {
     white-space: normal;
-    /* let pills wrap */
-    overflow: visible;
-    /* table cells ignore overflow in many browsers anyway */
+    overflow: visible
 }
 
-/* spacing when wrapping to multiple lines */
 td.col-authors .pill {
     margin-right: 6px;
-    margin-top: 4px;
+    margin-top: 4px
 }
 
-/* TITLE column */
-td.col-title {
-    /* keep table-cell so vertical-align works */
-    vertical-align: middle;
-}
-
-/* flex only the inner wrapper */
 td.col-title .titlewrap {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 8px
 }
 
-td.col-title .titlewrap a,
 td.col-title a {
     white-space: normal !important;
-    /* was nowrap */
     overflow: visible;
-    /* let wrapped lines show */
     text-overflow: clip;
-    /* no ellipsis while wrapping */
     overflow-wrap: anywhere;
-    /* break long tokens if needed */
-    word-break: break-word;
+    word-break: break-word
 }
 
-/* hard guard: no tag chips under title */
 td.col-title .tag,
 td.col-title .pill[data-kind="tag"],
 td.col-title .pill:not(.sev-warn) {
-    display: none !important;
+    display: none !important
 }
 
-/* TAGS column (left-aligned, clipped, max 3) */
 td.col-tags {
     white-space: normal;
-    /* allow wrapping */
     overflow: visible;
-    /* so wrapped lines aren’t clipped */
     text-align: left;
-    vertical-align: top;
-    /* keeps the title from overlapping visually */
+    vertical-align: top
 }
 
 td.col-tags .tags-row {
@@ -663,11 +555,8 @@ td.col-tags .pill {
     margin: 0
 }
 
-/* chips inside the tags column */
 td.col-tags .tag {
-    display: inline-flex;
-    margin: 0 6px 6px 0;
-    /* space between wrapped chips */
+    margin: 0 6px 6px 0
 }
 
 td.col-tags .tag:nth-child(n+4),
@@ -675,24 +564,22 @@ td.col-tags .pill:nth-child(n+4) {
     display: none
 }
 
-/* links */
+/* links in content blocks */
 .panel a,
 .details a,
 article a,
 .post-body a {
-    color: var(--accent);
-    text-decoration: none
+    color: var(--accent)
 }
 
 .panel a:hover,
 .details a:hover,
 article a:hover,
 .post-body a:hover {
-    color: var(--accent-2);
-    text-decoration: underline
+    color: var(--accent-2)
 }
 
-/* details/meta */
+/* details / meta */
 .details h3 {
     margin: 0 0 6px;
     font-size: 16px
@@ -743,244 +630,69 @@ article a:hover,
     background: linear-gradient(180deg, rgba(34, 35, 32, 0), #222320 65%)
 }
 
-.details .more {
-    margin-top: 8px;
-    background: var(--chip);
+/* code blocks + copy */
+#article pre,
+.post-body pre {
+    position: relative;
+    padding: 12px;
     border: 1px solid var(--edge);
-    color: var(--ink);
     border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 12px;
-    cursor: pointer
+    background: #222320;
+    color: var(--ink);
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    white-space: pre;
+    word-wrap: normal;
+    word-break: normal;
 }
 
-.details .more:hover {
-    border-color: #6b625a
+#article pre code,
+.post-body pre code {
+    white-space: inherit
 }
 
-/* footer */
-.foot {
-    margin-top: 16px;
-    padding: 10px 14px;
-    background: var(--bg-1);
-    border: 1px solid var(--edge);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--muted);
-    font-size: 12px
+.copyBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2
 }
 
-/* ===== responsive ===== */
-@media (max-width:1100px) {
-    .grid {
-        grid-template-columns: 1fr minmax(0, 1fr)
-    }
-
-    .right {
-        order: 3;
-        grid-column: 1/-1
-    }
+/* Hugo/Chroma wrappers */
+#article .highlight,
+#article .chroma {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch
 }
 
-@media (max-width:980px) {
-    .grid {
-        grid-template-columns: 1fr
-    }
+#article .highlight pre,
+#article .chroma pre {
+    display: inline-block;
+    min-width: 100%;
+    white-space: pre
 }
 
-/* Phone layout */
-@media (max-width:720px) {
-    .app {
-        width: 100%;
-        max-width: 100%;
-        padding: 12px
-    }
-
-    .grid {
-        grid-template-columns: 1fr;
-        gap: 12px
-    }
-
-    .panel {
-        border-radius: 10px
-    }
-
-    .topbar {
-        padding: 8px 10px;
-        gap: 10px
-    }
-
-    .theme-select {
-        min-width: 0;
-        width: 140px
-    }
-
-    /* toolbar stacks */
-    .toolbar {
-        grid-template-columns: 1fr;
-        gap: 8px
-    }
-
-    .qwrap {
-        grid-column: auto
-    }
-
-    .select,
-    .btn {
-        width: 100%
-    }
-
-    .hist {
-        height: 48px;
-        gap: 4px;
-        padding: 8px 10px
-    }
-
-    .hist-legend {
-        font-size: 10px;
-        padding: 0 10px 8px
-    }
-
-    .events {
-        table-layout: auto;
-        border-collapse: separate;
-        border-spacing: 0
-    }
-
-    .events thead {
-        display: none
-    }
-
-    .events tbody {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        gap: 10px;
-        padding: 10px
-    }
-
-    .events tbody tr {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 6px;
-        background: var(--row);
-        border: 1px solid var(--edge);
-        border-radius: 10px;
-        padding: 10px;
-        background-image: none
-    }
-
-    .events tbody tr.sel {
-        outline-offset: 0
-    }
-
-    .events td {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0;
-        border: 0;
-        background: transparent
-    }
-
-    /* prevent horizontal overflow inside cards */
-    .events td {
-        min-width: 0;
-        /* allow the cell to shrink */
-        max-width: 100%;
-        overflow: hidden;
-        /* guardrail */
-    }
-
-    .events td>* {
-        min-width: 0;
-        /* let content shrink */
-        flex: 1 1 0;
-    }
-
-    .events td.col-title a {
-        min-width: 0;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-    }
-
-    .events td.col-authors,
-    .events td.col-tags {
-        flex-wrap: wrap;
-    }
-
-    .events td .tag,
-    .events td .pill {
-        max-width: 100%;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-    }
-
-    .events td.col-title {
-        order: -1;
-        display: block;
-        margin-bottom: 4px
-    }
-
-    .events td.col-title a {
-        font-size: 16px;
-        line-height: 1.25;
-        white-space: normal;
-        overflow: visible;
-        text-overflow: unset
-    }
-
-    .events td.col-time::before {
-        content: "Time"
-    }
-
-    .events td.col-authors::before {
-        content: "Author(s)"
-    }
-
-    .events td.col-tags::before {
-        content: "Tags"
-    }
-
-    .events td::before {
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        font-size: var(--fs-0);
-        flex: 0 0 auto;
-        min-width: 84px;
-    }
-
-    .resizer {
-        display: none !important
-    }
-
-    .col-tags {
-        flex-wrap: wrap
-    }
-
-    .col-tags .tag {
-        margin-top: 4px
-    }
-
-    /* optional: tighter title on phones */
-    .title {
-        font-size: 24px;
-        line-height: 1.25
-    }
-
-    /* hide the right details panel on very small screens */
-    .right.panel {
-        display: none
-    }
+#article .highlight pre span[style*="display:flex"] {
+    display: block !important
 }
 
-/* ===================== POST PAGE ===================== */
+#article {
+    overflow-x: hidden
+}
+
+.grid-post>* {
+    min-width: 0
+}
+
+/* post layout */
 .grid-post {
     display: grid;
     grid-template-columns: 240px minmax(0, 1fr) 280px;
-    gap: 16px;
+    gap: 16px
 }
 
 .crumbs {
@@ -993,17 +705,15 @@ article a:hover,
 }
 
 .crumbs a {
-    color: var(--accent);
-    text-decoration: none
+    color: var(--accent)
 }
 
 .crumbs a:hover {
-    color: var(--accent-2);
-    text-decoration: underline
+    color: var(--accent-2)
 }
 
 .title {
-    margin: 4px 0 4px;
+    margin: 4px 0;
     font-size: var(--fs-5);
     line-height: 1.2
 }
@@ -1033,7 +743,6 @@ article a:hover,
 #toc a {
     display: block;
     color: var(--ink);
-    text-decoration: none;
     padding: 6px 8px;
     border-radius: 8px;
     border: 1px solid var(--edge);
@@ -1047,7 +756,7 @@ article a:hover,
 }
 
 #toc a:hover {
-    background: rgba(142, 192, 124, .08);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
     border-color: #6b625a
 }
 
@@ -1059,7 +768,7 @@ article a:hover,
     background: var(--bg-1);
     border: 1px dashed var(--edge);
     border-radius: 10px;
-    padding: 10px 12px;
+    padding: 10px 12px
 }
 
 .label {
@@ -1096,13 +805,11 @@ article a:hover,
 }
 
 #article a {
-    color: var(--accent);
-    text-decoration: none
+    color: var(--accent)
 }
 
 #article a:hover {
-    color: var(--accent-2);
-    text-decoration: underline
+    color: var(--accent-2)
 }
 
 #article blockquote {
@@ -1113,142 +820,7 @@ article a:hover,
     border-radius: 6px
 }
 
-/* Code blocks + copy button */
-/* Code blocks + copy button — safe for mobile */
-#article pre,
-.post-body pre {
-    position: relative;
-    padding: 12px;
-    border: 1px solid var(--edge);
-    border-radius: 8px;
-    background: #222320;
-    color: var(--ink);
-    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-
-    max-width: 100%;
-    overflow-x: auto;
-    /* ✅ prevents horizontal layout breaks */
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    white-space: pre;
-    /* preserve formatting */
-    word-wrap: normal;
-    word-break: normal;
-}
-
-/* Inner code inherits no-wrap */
-/* Code blocks + copy button — safe for mobile */
-#article pre,
-.post-body pre {
-    position: relative;
-    padding: 12px;
-    border: 1px solid var(--edge);
-    border-radius: 8px;
-    background: #222320;
-    color: var(--ink);
-    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-
-    /* key bits */
-    max-width: 100%;
-    overflow-x: auto;
-    /* scroll long lines */
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    white-space: pre;
-    word-wrap: normal;
-    word-break: normal;
-}
-
-#article pre code,
-.post-body pre code {
-    white-space: inherit;
-}
-
-.copyBtn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 12px;
-    background: var(--chip);
-    border: 1px solid var(--edge);
-    color: var(--ink);
-    border-radius: 6px;
-    padding: 4px 8px;
-    cursor: pointer;
-    z-index: 2;
-}
-
-.copyBtn:hover {
-    border-color: #6b625a;
-}
-
-/* Hugo/Chroma wrapper fixes: make the wrapper the scroller */
-#article .highlight,
-#article .chroma {
-    max-width: 100%;
-    overflow-x: auto;
-    /* wrapper scrolls if needed */
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Let the <pre> size to its content inside the scrolling wrapper */
-#article .highlight pre,
-#article .chroma pre {
-    display: inline-block;
-    min-width: 100%;
-    /* at least container width */
-    white-space: pre;
-}
-
-/* Chroma sometimes emits <span style="display:flex"> per line — override it */
-#article .highlight pre span[style*="display:flex"] {
-    display: block !important;
-}
-
-/* Belt-and-braces: the article container never expands the page width */
-#article {
-    overflow-x: hidden;
-}
-
-.grid-post>* {
-    min-width: 0;
-}
-
-/* Meta/kv grid in right panel */
-.grid-post aside.panel .kv {
-    display: grid;
-    grid-template-columns: minmax(8ch, max-content) 1fr;
-    column-gap: 8px
-}
-
-.grid-post aside.panel .kv .k {
-    text-align: left;
-    white-space: nowrap
-}
-
-/* responsive collapse for post page */
-@media (max-width:1100px) {
-    .grid-post {
-        grid-template-columns: 1fr
-    }
-}
-
-/* prevent overflow in right meta grid */
-.grid-post aside.panel .kv {
-    grid-template-columns: minmax(8ch, max-content) minmax(0, 1fr)
-}
-
-.grid-post aside.panel .kv>div {
-    min-width: 0
-}
-
-.grid-post aside.panel .kv>div:not(.k) {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    hyphens: auto
-}
-
-/* Media never overflow */
+/* media */
 #article img,
 #article video,
 .post-body img,
@@ -1265,7 +837,7 @@ article a:hover,
     -webkit-overflow-scrolling: touch
 }
 
-/* Prevent dropdown arrow clipping & keep spacing right */
+/* form select */
 select.select {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1274,23 +846,18 @@ select.select {
     line-height: 1.2;
     background-clip: padding-box;
     padding-right: 36px;
+    overflow: visible;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a89984' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: 10px;
     background-position: right 10px center;
-    overflow: visible;
 }
 
-/* Floating "Filters" button + drawer */
-/* Floating "Filters" button + drawer */
+/* filters FAB + drawer */
 .filters-fab {
     position: fixed;
     right: 16px;
     bottom: calc(env(safe-area-inset-bottom, 0px) + var(--fab-bottom, 16px));
-    /* explicit top/left to override any previous 'inset' */
-    top: auto;
-    left: auto;
-
     z-index: 100;
     background: var(--chip);
     border: 1px solid var(--edge);
@@ -1298,46 +865,84 @@ select.select {
     border-radius: 999px;
     padding: 10px 14px;
     font-size: var(--fs-1);
-    cursor: pointer;
+    cursor: pointer
 }
 
-/* Style the in-drawer close button (mobile only) */
-/* Hide the inline close button on desktop */
 .filters-close {
-    display: none;
+    display: none
 }
 
-/* Show & align it on mobile, centered vertically in the header */
-@media (max-width: 900px) {
-    .left.panel .hd {
-        display: flex;
-        align-items: center;
+/* authors */
+.author-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 12px 0
+}
+
+.author-card {
+    display: flex;
+    gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    padding: 10px;
+    align-items: center
+}
+
+.author-card .info {
+    min-width: 0
+}
+
+.author-card .name {
+    margin: 0 0 2px;
+    font-size: var(--fs-3);
+    line-height: 1.2
+}
+
+.author-card .role {
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-size: var(--fs-1)
+}
+
+.author-card .bio {
+    margin: 0 0 8px;
+    line-height: 1.5
+}
+
+.author-card .links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap
+}
+
+.author-card .links svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto
+}
+
+/* ===== responsive ===== */
+@media (max-width:1100px) {
+    .grid {
+        grid-template-columns: 1fr minmax(0, 1fr)
     }
 
-    .left.panel .filters-close {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        margin-left: auto;
-        /* push to the right edge of the header */
-        background: var(--chip);
-        border: 1px solid var(--edge);
-        border-radius: 8px;
-        color: var(--muted);
-        /* SVG picks this via currentColor */
-        cursor: pointer;
+    .right {
+        order: 3;
+        grid-column: 1/-1
     }
 
-    .left.panel .filters-close:hover {
-        border-color: #6b625a;
-        color: var(--ink);
+    .grid-post,
+    .grid-post.no-meta {
+        grid-template-columns: 1fr
     }
+}
 
-    /* keep the FAB tappable while overlay is up */
-    .filters-fab {
-        z-index: 100;
+@media (max-width:980px) {
+    .grid {
+        grid-template-columns: 1fr
     }
 }
 
@@ -1350,7 +955,7 @@ select.select {
         width: min(92vw, 360px);
         transform: translateX(-105%);
         transition: transform .2s ease;
-        z-index: 70;
+        z-index: 70
     }
 
     body.filters-open .left.panel {
@@ -1360,177 +965,223 @@ select.select {
     .filters-fab {
         display: inline-flex;
         align-items: center;
+        gap: 8px;
+        z-index: 100
+    }
+
+    .left.panel .hd {
+        display: flex;
+        align-items: center
+    }
+
+    .left.panel .filters-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        margin-left: auto;
+        background: var(--chip);
+        border: 1px solid var(--edge);
+        border-radius: 8px;
+        color: var(--muted);
+        cursor: pointer
+    }
+
+    .left.panel .filters-close:hover {
+        border-color: #6b625a;
+        color: var(--ink)
+    }
+}
+
+@media (max-width:720px) {
+    .app {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 12px
+    }
+
+    .panel {
+        border-radius: 10px
+    }
+
+    .topbar {
+        padding: 8px 10px;
+        gap: 10px
+    }
+
+    .theme-select {
+        min-width: 0;
+        width: 140px
+    }
+
+    .toolbar {
+        grid-template-columns: 1fr;
         gap: 8px
     }
-}
 
-@media (min-width:901px) {
-    .filters-fab {
+    .select,
+    .btn {
+        width: 100%
+    }
+
+    .hist {
+        height: 48px;
+        gap: 4px;
+        padding: 8px 10px
+    }
+
+    .hist-legend {
+        font-size: 10px;
+        padding: 0 10px 8px
+    }
+
+    .events {
+        table-layout: auto
+    }
+
+    .events thead {
         display: none
     }
-}
 
-/* TOC on phones: wrap instead of one long horizontal row */
-@media (max-width: 720px) {
+    .events tbody {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px
+    }
+
+    .events tbody tr {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        border: 1px solid var(--edge);
+        border-radius: 10px;
+        padding: 10px;
+        background-image: none
+    }
+
+    .events td {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden
+    }
+
+    .events td>* {
+        min-width: 0;
+        flex: 0 1 auto;
+    }
+
+    .events td.col-title>* {
+        flex: 1 1 0;
+    }
+
+    /* only the title can grow */
+    .events td.col-title {
+        order: -1;
+        display: block;
+        margin-bottom: 4px
+    }
+
+    .events td.col-title a {
+        font-size: 16px;
+        line-height: 1.25
+    }
+
+    .events td.col-authors,
+    .events td.col-tags {
+        flex-wrap: wrap
+    }
+
+    .events td .tag,
+    .events td .pill {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word
+    }
+
+    .events td.col-time::before {
+        content: "Time"
+    }
+
+    .events td.col-authors::before {
+        content: "Author(s)"
+    }
+
+    .events td.col-tags::before {
+        content: "Tags"
+    }
+
+    .events td::before {
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-size: var(--fs-0);
+        flex: 0 0 auto;
+        min-width: 84px
+    }
+
+    .events tbody tr.sel {
+        background-color: color-mix(in oklab, var(--row) 92%, var(--accent) 8%);
+        border-color: color-mix(in oklab, var(--accent) 40%, var(--edge));
+        outline: 0
+    }
+
+    .resizer {
+        display: none !important
+    }
+
+    .col-tags {
+        flex-wrap: wrap
+    }
+
+    .col-tags .tag {
+        margin-top: 4px
+    }
+
     #toc {
-        position: static;
+        position: static
     }
 
     #toc ul {
-        display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        /* <-- key: allow multiple rows */
         gap: 8px;
         max-width: 100%;
-        overflow-x: visible;
-        /* no page-width push */
+        overflow-x: visible
     }
 
     #toc a {
         white-space: normal;
-        /* allow wrapping inside chips */
         overflow-wrap: anywhere;
-        /* break long tokens */
         word-break: break-word;
-        /* fallback */
-        hyphens: auto;
-        /* nicer hyphenation if allowed */
+        hyphens: auto
     }
-}
 
-/* Landing page table should use full width on phones */
-@media (max-width: 720px) {
-
-    /* stop using table layout so column widths don't constrain it */
     table.events {
         display: block;
-        /* was table */
         width: 100% !important;
         max-width: 100%;
-        margin: 0;
+        margin: 0
     }
 
-    /* colgroup still in DOM? hide it so its widths can't apply */
     table.events colgroup {
-        display: none !important;
-    }
-
-    /* card list */
-    table.events tbody {
-        display: grid;
-        /* you already had this—keep it */
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 10px;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    /* each card */
-    table.events tbody tr {
-        width: 100%;
-        margin: 0;
+        display: none !important
     }
 }
 
+/* post variant without meta */
 .grid-post.no-meta {
-    grid-template-columns: 240px minmax(0, 1fr);
-}
-
-@media (max-width:1100px) {
-    .grid-post.no-meta {
-        grid-template-columns: 1fr;
-    }
-}
-
-.author-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 12px;
-    margin: 12px 0;
-}
-
-.author-card {
-    display: flex;
-    gap: 12px;
-    background: var(--panel);
-    border: 1px solid var(--edge);
-    border-radius: 12px;
-    padding: 10px;
-    align-items: center;
-}
-
-.author-card .info {
-    min-width: 0;
-}
-
-.author-card .name {
-    margin: 0 0 2px;
-    font-size: var(--fs-3);
-    line-height: 1.2;
-}
-
-.author-card .role {
-    margin: 0 0 6px;
-    color: var(--muted);
-    font-size: var(--fs-1);
-}
-
-.author-card .bio {
-    margin: 0 0 8px;
-    line-height: 1.5;
-}
-
-.author-card .links {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.author-card .links a {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--chip);
-    border: 1px solid var(--edge);
-    color: var(--ink);
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-size: var(--fs-1);
-    text-decoration: none;
-}
-
-.author-card .links a:hover {
-    color: var(--accent);
-    border-color: #6b625a;
-}
-
-.author-card .links svg {
-    width: 14px;
-    height: 14px;
-    flex: 0 0 auto;
-}
-
-/* Selected row — subtle tint + thin outline */
-.events tbody tr.sel {
-    /* faint background tint */
-    background-color: color-mix(in oklab, var(--row) 94%, var(--accent) 6%);
-    /* discrete 1px inner outline */
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
-}
-
-/* Cells have their own background; let the row tint show through */
-.events tbody tr.sel td {
-    background: transparent;
-}
-
-/* Mobile card variant: slightly stronger so it reads against the card border */
-@media (max-width:720px) {
-    .events tbody tr.sel {
-        background-color: color-mix(in oklab, var(--row) 92%, var(--accent) 8%);
-        border-color: color-mix(in oklab, var(--accent) 40%, var(--edge));
-        outline: 0;
-        /* keep it clean on cards */
-    }
+    grid-template-columns: 240px minmax(0, 1fr)
 }
