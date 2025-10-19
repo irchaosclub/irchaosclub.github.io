@@ -8,13 +8,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Panel } from "@/components/shell/Panel";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PostAreaInteractive, Bin } from "@/components/charts/PostAreaInteractive";
 import { parseQuery, matchesQuery } from "@/lib/search";
 import { ExternalLink, Search } from "lucide-react";
 import { InfoBox } from "@/components/ui/infobox";
 import { MobilePostSheet } from "@/components/mobile/MobilePostSheet";
+import { CliSearch } from "@/components/search/CliSearch";
+
 
 // Detects if the title wraps >1 line and adds extra vertical padding only then.
 // Adds a bit of vertical padding only when the title wraps onto multiple lines.
@@ -173,6 +174,8 @@ export default function Home({ posts }: Props) {
     const [authorFacet, setAuthorFacet] = useState<Set<string>>(new Set());
     const [tagFacet, setTagFacet] = useState<Set<string>>(new Set());
     const [daysFacet, setDaysFacet] = useState<number | null>(null);
+    const [searchFocused, setSearchFocused] = useState(false);
+
 
     // query parse
     const q = useMemo(() => parseQuery(query), [query]);
@@ -393,19 +396,27 @@ export default function Home({ posts }: Props) {
                         </Button>
                     }
                 >
-                    <Input
-                        leftIcon={<span className="text-xs md:text-sm text-muted-foreground font-mono">siem@ircc $</span>}
-                        className="h-10 pl-28 mono-accent"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="reverse author:humpty after:2025-01-01"
-                    />
-                    <div className="mt-2 flex flex-wrap gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " author:alice" : "author:alice"))}>author:alice</Button>
-                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " tag:reverse" : "tag:reverse"))}>tag:reverse</Button>
-                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " after:2025-01-01" : "after:2025-01-01"))}>after:2025-01-01</Button>
-                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " before:2025-12-31" : "before:2025-12-31"))}>before:2025-12-31</Button>
-                    </div>
+                        <div className="relative">
+                            <CliSearch
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="reverse author:humpty after:2025-01-01"
+                            />
+
+
+                            {/* (Optional) subtle right hint */}
+                            <span className="pointer-events-none absolute inset-y-0 right-3 hidden items-center text-xs text-[#928374] md:flex">
+                                ↵ to search
+                            </span>
+                        </div>
+
+                        {/* Quick tokens remain the same */}
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' author:alice' : 'author:alice'))}>author:alice</Button>
+                            <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' tag:reverse' : 'tag:reverse'))}>tag:reverse</Button>
+                            <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' after:2025-01-01' : 'after:2025-01-01'))}>after:2025-01-01</Button>
+                            <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' before:2025-12-31' : 'before:2025-12-31'))}>before:2025-12-31</Button>
+                        </div>
                 </Panel>
 
 

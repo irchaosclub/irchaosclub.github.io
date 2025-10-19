@@ -7,7 +7,7 @@ export default function Header() {
                 <div className="flex items-center justify-between gap-4">
                     <Link href="/" className="group">
                         <div className="leading-tight">
-                            <div className="text-sm md:text-2xl font-mono tracking-wide text-primary">
+                            <div className="text-sm md:text-xl font-mono tracking-wide text-primary">
                                 IRCC — Incident Response Chaos Club
                             </div>
                             <div className="text-sm md:text-base text-muted-foreground">

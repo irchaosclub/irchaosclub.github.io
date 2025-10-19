@@ -205,3 +205,27 @@
             filter: brightness(1.05);
         }
 }
+
+/* ---- CLI blink + caret helpers ---- */
+@keyframes caret-blink {
+
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.caret-blink {
+    animation: caret-blink 1s steps(1, end) infinite;
+}
+
+@layer components {
+    .kbd {
+        @apply rounded border border-border bg-muted/20 px-1.5 py-0.5 font-mono text-xs;
+    }
+}
