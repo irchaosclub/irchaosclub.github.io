@@ -1,38 +1,38 @@
-# --- Hugo ---
-public/*
-public/
-resources/*              # Hugo resource cache (images, SASS, etc.)
-resources/
-/.hugo_build.lock
-hugo_stats.json          # From Hugo Pipes/Tailwind integration
-
-# If your GitHub Pages site publishes from /docs, TRACK docs and
-# comment the next line out. By default we do NOT ignore docs.
-# /docs/
-
-# --- OS cruft ---
-.DS_Store
-Thumbs.db
-
-# --- Logs ---
+# --- Node ---
+node_modules/
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# --- Node/bundlers caches (optional but nice to ignore) ---
-node_modules/
-.pnp.*
-.cache/
-.parcel-cache/
-.sass-cache/
+# --- Next.js build artifacts ---
+.next/
+.next/cache/
+out/
+
+# --- Contentlayer (generated types & cache) ---
+.contentlayer/
+.contentlayer-build/
+
+# --- TypeScript ---
+*.tsbuildinfo
+
+# --- Build outputs / tools ---
 dist/
+.turbo/
+.vercel/
+.cache/
 
-# --- Editors/IDE ---
+# --- Env files ---
+.env*
+!.env.example      # keep a template if you use one
+
+# --- Editors / OS junk ---
 .vscode/
 .idea/
-*.code-workspace
-
-# --- Temp/backup ---
+.DS_Store
+Thumbs.db
 *.swp
-*~
+*.swo

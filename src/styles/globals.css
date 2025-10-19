@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Gruvbox DARK palette (from your image) ---------- */
+/* raw palette (kept as g- variables for reuse anywhere) */
+:root {
+    /* backgrounds */
+    --g-bg0_h: #1d2021;
+    /* hard */
+    --g-bg0: #282828;
+    --g-bg0_s: #32302f;
+    /* soft */
+    --g-bg1: #3c3836;
+    --g-bg2: #504945;
+    --g-bg3: #665c54;
+    --g-bg4: #7c6f64;
+
+    /* foregrounds */
+    --g-fg0: #fbf1c7;
+    --g-fg1: #ebdbb2;
+    --g-fg2: #d5c4a1;
+    --g-fg3: #bdae93;
+    --g-fg4: #a89984;
+
+    /* accents */
+    --g-red: #cc241d;
+    --g-red-br: #fb4934;
+    --g-green: #98971a;
+    --g-green-br: #b8bb26;
+    --g-yellow: #d79921;
+    --g-yellow-br: #fabd2f;
+    --g-blue: #458588;
+    --g-blue-br: #83a598;
+    --g-purple: #b16286;
+    --g-purple-br: #d3869b;
+    --g-aqua: #689d6a;
+    --g-aqua-br: #8ec07c;
+    --g-orange: #d65d0e;
+    --g-orange-br: #fe8019;
+
+    /* ---------- shadcn/ui theme mapping (DARK as default) ---------- */
+    --background: var(--g-bg0_h);
+    /* page */
+    --foreground: var(--g-fg1);
+
+    --card: var(--g-bg0);
+    /* panels */
+    --card-foreground: var(--g-fg1);
+
+    --popover: var(--g-bg0_s);
+    --popover-foreground: var(--g-fg1);
+
+    --primary: var(--g-aqua-br);
+    /* main accent */
+    --primary-foreground: var(--g-bg0_h);
+
+    --secondary: var(--g-orange-br);
+    /* secondary accent (buttons, chips) */
+    --secondary-foreground: var(--g-bg0_h);
+
+    --muted: var(--g-bg1);
+    /* subdued surfaces */
+    --muted-foreground: var(--g-fg3);
+
+    --accent: var(--g-blue-br);
+    --accent-foreground: var(--g-bg0_h);
+
+    --destructive: var(--g-red-br);
+    --destructive-foreground: var(--g-bg0_h);
+
+    --border: var(--g-bg2);
+    --input: var(--g-bg2);
+    --ring: var(--g-aqua-br);
+
+    --radius: 10px;
+    --header-h: 56px;
+}
+
+/* ---------- Base reset + subtle SOC texture (dark) ---------- */
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        background-image:
+            radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(transparent 0, rgba(255, 255, 255, 0.025) 1px);
+        background-size: 22px 22px, 100% 2px;
+        background-repeat: repeat, repeat;
+    }
+}
+
+/* ---------- SIEM panels & helpers ---------- */
+@layer utilities {
+    .panel {
+        position: relative;
+        border-radius: var(--radius);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.04),
+            0 0 0 1px rgba(142, 192, 124, 0.08),
+            /* aqua glow */
+            0 10px 28px rgba(0, 0, 0, 0.45);
+        background: var(--card);
+    }
+
+    .panel::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, rgba(142, 192, 124, 0.36), rgba(142, 192, 124, 0.06));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    .panel-header {
+        position: relative;
+    }
+
+    .panel-header::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -4px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(142, 192, 124, 0.7), transparent);
+    }
+
+    .mono-accent {
+        @apply font-mono tracking-tight;
+    }
+
+    .zebra tbody tr:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .input-neo:focus-visible {
+        box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px rgba(142, 192, 124, 0.28);
+        outline: none;
+    }
+
+    /* CSS-variable alpha helpers (no bg-muted/40 etc.) */
+    .bg-muted-10 {
+        background-color: color-mix(in srgb, var(--muted) 10%, transparent);
+    }
+
+    .bg-muted-20 {
+        background-color: color-mix(in srgb, var(--muted) 20%, transparent);
+    }
+
+    .bg-muted-30 {
+        background-color: color-mix(in srgb, var(--muted) 30%, transparent);
+    }
+
+    .bg-muted-40 {
+        background-color: color-mix(in srgb, var(--muted) 40%, transparent);
+    }
+
+    .bg-muted-60 {
+        background-color: color-mix(in srgb, var(--muted) 60%, transparent);
+    }
+
+    /* darker info box specifically for selected-post description */
+    .infobox {
+        background-color: var(--g-bg0_h);
+        /* clearly darker than panel */
+        border: 1px solid var(--g-bg2);
+        border-radius: 8px;
+    }
+
+    .capsule {
+        @apply rounded-full px-2 py-[2px] text-[11px] font-mono;
+    }
+
+    .capsule {
+        background-color: color-mix(in srgb, var(--muted) 40%, transparent);
+    }
+
+        /* ----- colored pills (driven by CSS variables) ----- */
+        .pill {
+            @apply inline-flex items-center rounded-full px-2.5 py-[3px] text-[11px] font-mono border transition-colors;
+            background-color: var(--pill-bg, transparent);
+            color: var(--pill-fg, var(--foreground));
+            border-color: var(--pill-bd, var(--border));
+        }
+    
+        .pill:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px color-mix(in srgb, var(--ring) 35%, transparent);
+        }
+    
+        .pill:hover {
+            filter: brightness(1.05);
+        }
+}

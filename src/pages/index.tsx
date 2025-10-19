@@ -1,0 +1,593 @@
+// src/pages/index.tsx
+import Link from "next/link";
+import { useMemo, useState, useEffect, useRef} from "react";
+import { allPosts, Post } from "contentlayer/generated";
+import { Pill } from "@/components/ui/pill";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Panel } from "@/components/shell/Panel";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { PostAreaInteractive, Bin } from "@/components/charts/PostAreaInteractive";
+import { parseQuery, matchesQuery } from "@/lib/search";
+import { ExternalLink, Search } from "lucide-react";
+import { InfoBox } from "@/components/ui/infobox";
+import { MobilePostSheet } from "@/components/mobile/MobilePostSheet";
+
+// Detects if the title wraps >1 line and adds extra vertical padding only then.
+// Adds a bit of vertical padding only when the title wraps onto multiple lines.
+// Adds a bit of vertical padding only when the title wraps onto multiple lines (desktop table cell).
+function TitleCell({
+    title, slug, external,
+}: { title: string; slug: string; external?: string }) {
+    const spanRef = useRef<HTMLSpanElement>(null);
+    const [wrapped, setWrapped] = useState(false);
+
+    useEffect(() => {
+        const el = spanRef.current;
+        if (!el) return;
+        const compute = () => {
+            const cs = getComputedStyle(el);
+            const lh = parseFloat(cs.lineHeight || "20");
+            const lines = Math.max(1, Math.round(el.scrollHeight / (lh || 1)));
+            setWrapped(lines > 1);
+        };
+        compute();
+        const ro = new ResizeObserver(compute);
+        ro.observe(el);
+        window.addEventListener("resize", compute);
+        return () => { ro.disconnect(); window.removeEventListener("resize", compute); };
+    }, [title]);
+
+    return (
+        <TableCell className={`max-w-[80ch] min-w-0 whitespace-normal break-words ${wrapped ? "py-3" : ""}`}>
+            {external ? (
+                <a href={external} className="hover:text-primary underline inline-flex items-center gap-1 min-w-0">
+                    <span ref={spanRef} className="break-words whitespace-normal">{title}</span>
+                    <ExternalLink className="h-4 w-4 flex-none shrink-0" />
+                </a>
+            ) : (
+                <Link href={`/${slug}/`} className="hover:text-primary underline break-words whitespace-normal">
+                    <span ref={spanRef}>{title}</span>
+                </Link>
+            )}
+        </TableCell>
+    );
+}
+
+// Mobile-friendly "card" list of posts (used only on < md).
+function MobilePosts({
+    posts,
+    onCardClick,
+    authorFacet, tagFacet,
+    toggleAuthor, toggleTag,
+}: {
+    posts: Post[];
+    onCardClick: (p: Post) => void;
+    authorFacet: Set<string>;
+    tagFacet: Set<string>;
+    toggleAuthor: (a: string) => void;
+    toggleTag: (t: string) => void;
+}) {
+    return (
+        <div className="space-y-2">
+            {posts.map((p) => {
+                const ext = (p as any).external as string | undefined;
+                const authors = ((p as any).authors ?? []) as string[];
+                const tags = ((p as any).tags ?? []) as string[];
+                return (
+                    <button
+                        key={p.slug}
+                        className="w-full text-left rounded-md border border-border bg-card/60 p-3 hover:bg-muted-10 transition"
+                        onClick={() => onCardClick(p)}
+                    >
+                        <div className="flex items-center justify-between gap-2">
+                            <time className="text-xs text-muted-foreground" dateTime={p.date}>
+                                {new Date(p.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}
+                            </time>
+                            {ext ? <ExternalLink className="h-4 w-4 shrink-0" /> : null}
+                        </div>
+
+                        <div className="mt-1 font-medium underline break-words whitespace-normal">
+                            {p.title}
+                        </div>
+
+                        {authors.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                                {authors.map((a) => (
+                                    <Pill
+                                        key={a}
+                                        variant={authorFacet.has(a) ? "solid" : "soft"}
+                                        onClick={(e) => { e.stopPropagation(); toggleAuthor(a); }}
+                                    >
+                                        {a}
+                                    </Pill>
+                                ))}
+                            </div>
+                        )}
+
+                        {tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                                {tags.map((t) => (
+                                    <Pill
+                                        key={t}
+                                        variant={tagFacet.has(t) ? "solid" : "soft"}
+                                        onClick={(e) => { e.stopPropagation(); toggleTag(t); }}
+                                    >
+                                        {t}
+                                    </Pill>
+                                ))}
+                            </div>
+                        )}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+
+
+
+/* ----- build-time data ----- */
+export async function getStaticProps() {
+    const posts = [...allPosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return { props: { posts } };
+}
+type Props = { posts: Post[] };
+
+/* ----- helpers ----- */
+type Counts = Record<string, number>;
+function countValues(values: string[] | undefined): Counts {
+    const out: Counts = {};
+    for (const v of values ?? []) out[v] = (out[v] ?? 0) + 1;
+    return out;
+}
+
+export default function Home({ posts }: Props) {
+    function resetAll() {
+        setQuery("");
+        setRange(null);
+        setAuthorFacet(new Set());
+        setTagFacet(new Set());
+        setDaysFacet(null);
+    }
+
+    const [isMobile, setIsMobile] = useState(false);
+    const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+
+    useEffect(() => {
+        const mq = window.matchMedia("(max-width: 767px)");
+        const set = () => setIsMobile(mq.matches);
+        set();
+        mq.addEventListener?.("change", set);
+        return () => mq.removeEventListener?.("change", set);
+    }, []);
+
+    // state
+    const [query, setQuery] = useState("");
+    const [range, setRange] = useState<{ start: Date; end: Date } | null>(null);
+    const [selected, setSelected] = useState<string | null>(posts[0]?.slug ?? null);
+    const [authorFacet, setAuthorFacet] = useState<Set<string>>(new Set());
+    const [tagFacet, setTagFacet] = useState<Set<string>>(new Set());
+    const [daysFacet, setDaysFacet] = useState<number | null>(null);
+
+    // query parse
+    const q = useMemo(() => parseQuery(query), [query]);
+
+    // filter by query
+    const filteredByQuery = useMemo(
+        () =>
+            posts.filter((p) =>
+                matchesQuery(
+                    {
+                        title: p.title,
+                        authors: (p as any).authors,
+                        tags: (p as any).tags,
+                        date: p.date,
+                        description: (p as any).description,
+                    },
+                    q
+                )
+            ),
+        [posts, q]
+    );
+
+    // Build histogram from data that ignores TIME (range & daysFacet).
+    // It still respects query + author/tag facets.
+    const histogramSource = useMemo(() => {
+        return filteredByQuery.filter((p) => {
+            if (authorFacet.size) {
+                const pa = new Set<string>((p as any).authors ?? []);
+                let ok = false; for (const a of authorFacet) if (pa.has(a)) { ok = true; break; }
+                if (!ok) return false;
+            }
+            if (tagFacet.size) {
+                const pt = new Set<string>((p as any).tags ?? []);
+                let ok = false; for (const t of tagFacet) if (pt.has(t)) { ok = true; break; }
+                if (!ok) return false;
+            }
+            return true;
+        });
+    }, [filteredByQuery, authorFacet, tagFacet]);
+
+
+    // facet counts
+    const authorCounts = useMemo(
+        () => countValues(filteredByQuery.flatMap((p) => ((p as any).authors ?? []) as string[])),
+        [filteredByQuery]
+    );
+    const tagCounts = useMemo(
+        () => countValues(filteredByQuery.flatMap((p) => ((p as any).tags ?? []) as string[])),
+        [filteredByQuery]
+    );
+
+    // quick time facet
+    const quickRange = useMemo(() => {
+        if (!daysFacet) return null;
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - daysFacet + 1);
+        return { start, end };
+    }, [daysFacet]);
+
+    // apply all filters
+    const fullyFiltered = useMemo(() => {
+        return filteredByQuery.filter((p) => {
+            const d = new Date(p.date);
+            if (range && !(d >= range.start && d <= range.end)) return false;
+            if (quickRange && !(d >= quickRange.start && d <= quickRange.end)) return false;
+
+            if (authorFacet.size) {
+                const pa = new Set<string>((p as any).authors ?? []);
+                let ok = false;
+                for (const a of authorFacet) if (pa.has(a)) {
+                    ok = true;
+                    break;
+                }
+                if (!ok) return false;
+            }
+            if (tagFacet.size) {
+                const pt = new Set<string>((p as any).tags ?? []);
+                let ok = false;
+                for (const t of tagFacet) if (pt.has(t)) {
+                    ok = true;
+                    break;
+                }
+                if (!ok) return false;
+            }
+            return true;
+        });
+    }, [filteredByQuery, range, quickRange, authorFacet, tagFacet]);
+
+    // current selection
+    const selectedPost = useMemo(
+        () => fullyFiltered.find((p) => p.slug === selected) ?? fullyFiltered[0] ?? null,
+        [fullyFiltered, selected]
+    );
+
+    // histogram bins (12 months)
+    const bins: Bin[] = useMemo(() => {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+
+        const arr: Bin[] = [];
+        for (let i = 0; i < 12; i++) {
+            const s = new Date(start.getFullYear(), start.getMonth() + i, 1);
+            const e = new Date(s.getFullYear(), s.getMonth() + 1, 0, 23, 59, 59, 999);
+            const key = `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, "0")}`;
+            arr.push({ key, label: key, start: s, end: e, count: 0 });
+        }
+
+        for (const p of histogramSource) {
+            const d = new Date(p.date);
+            const idx = arr.findIndex((b) => d >= b.start && d <= b.end);
+            if (idx >= 0) arr[idx].count += 1;
+        }
+        return arr;
+    }, [histogramSource]);
+
+
+    // helpers
+    function toggleFacet(setter: React.Dispatch<React.SetStateAction<Set<string>>>, value: string) {
+        setter((prev) => {
+            const next = new Set(prev);
+            next.has(value) ? next.delete(value) : next.add(value);
+            return next;
+        });
+    }
+    function resetFacets() {
+        setAuthorFacet(new Set());
+        setTagFacet(new Set());
+        setDaysFacet(null);
+        setRange(null);
+    }
+    function insertSnippet(snippet: string) {
+        setQuery((cur) => (cur ? `${cur} ${snippet}` : snippet));
+    }
+
+    // ---------- JSX ----------
+    return (
+        <>
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(300px,340px)] gap-5">
+            {/* LEFT FACETS (sticky under header) */}
+            <aside className="order-2 xl:order-1">
+                <Panel header="Facets" description="Refine the result set" className="sticky top-[calc(var(--header-h)+8px)]">
+
+                    <Accordion type="multiple" defaultValue={["time", "authors", "tags"]} className="space-y-1">
+                        <AccordionItem value="time">
+                            <AccordionTrigger>Time</AccordionTrigger>
+                            <AccordionContent>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button variant={daysFacet === 7 ? "secondary" : "outline"} size="sm" onClick={() => setDaysFacet(daysFacet === 7 ? null : 7)}>
+                                        Last 7d
+                                    </Button>
+                                    <Button variant={daysFacet === 30 ? "secondary" : "outline"} size="sm" onClick={() => setDaysFacet(daysFacet === 30 ? null : 30)}>
+                                        Last 30d
+                                    </Button>
+                                    <Button variant={daysFacet === 90 ? "secondary" : "outline"} size="sm" onClick={() => setDaysFacet(daysFacet === 90 ? null : 90)}>
+                                        Last 90d
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => setDaysFacet(null)}>
+                                        All time
+                                    </Button>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="authors">
+                            <AccordionTrigger>Authors</AccordionTrigger>
+                            <AccordionContent>
+                                <ScrollArea className="max-h-[200px] pr-1">
+                                    <ul className="space-y-1">
+                                        {Object.entries(authorCounts)
+                                            .sort((a, b) => b[1] - a[1])
+                                            .map(([name, count]) => (
+                                                <li key={name} className="flex items-center justify-between gap-2">
+                                                    <label className="flex items-center gap-2">
+                                                        <Checkbox checked={authorFacet.has(name)} onCheckedChange={() => toggleFacet(setAuthorFacet, name)} />
+                                                        <span className="text-sm">{name}</span>
+                                                    </label>
+                                                    <span className="text-xs text-muted-foreground">{count}</span>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </ScrollArea>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="tags">
+                            <AccordionTrigger>Tags</AccordionTrigger>
+                            <AccordionContent>
+                                <ScrollArea className="max-h-[240px] pr-1">
+                                    <ul className="space-y-1">
+                                        {Object.entries(tagCounts)
+                                            .sort((a, b) => b[1] - a[1])
+                                            .map(([tag, count]) => (
+                                                <li key={tag} className="flex items-center justify-between gap-2">
+                                                    <label className="flex items-center gap-2">
+                                                        <Checkbox checked={tagFacet.has(tag)} onCheckedChange={() => toggleFacet(setTagFacet, tag)} />
+                                                        <span className="text-sm">{tag}</span>
+                                                    </label>
+                                                    <span className="text-xs text-muted-foreground">{count}</span>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </ScrollArea>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </Panel>
+            </aside>
+
+            {/* CENTER (offset to align with sticky side panels) */}
+            <div className="order-1 xl:order-2 space-y-4 mt-[calc(var(--header-h)+8px)]">
+                <Panel
+                    header="Search"
+                    description={<>Type queries like <code>author:humpty tag:reverse after:2025-01-01</code></>}
+                    action={
+                        <Button variant="outline" size="sm" onClick={resetAll} title="Reset all filters">
+                            Reset Filters
+                        </Button>
+                    }
+                >
+                    <Input
+                        leftIcon={<span className="text-xs md:text-sm text-muted-foreground font-mono">siem@ircc $</span>}
+                        className="h-10 pl-28 mono-accent"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="reverse author:humpty after:2025-01-01"
+                    />
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " author:alice" : "author:alice"))}>author:alice</Button>
+                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " tag:reverse" : "tag:reverse"))}>tag:reverse</Button>
+                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " after:2025-01-01" : "after:2025-01-01"))}>after:2025-01-01</Button>
+                        <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + " before:2025-12-31" : "before:2025-12-31"))}>before:2025-12-31</Button>
+                    </div>
+                </Panel>
+
+
+                    {!isMobile && (
+                        <Panel header="New Posts" description="Monthly volume of new posts">
+                            <PostAreaInteractive bins={bins} />
+                        </Panel>
+                    )}
+
+
+
+
+                    <Panel header={`Posts (${fullyFiltered.length})`}>
+                        {/* Mobile list (no cramped table) */}
+                        {isMobile && (
+                            <MobilePosts
+                                posts={fullyFiltered}
+                                onCardClick={(p) => { setSelected(p.slug); setMobileSheetOpen(true); }}
+                                authorFacet={authorFacet}
+                                tagFacet={tagFacet}
+                                toggleAuthor={(a) => toggleFacet(setAuthorFacet, a)}
+                                toggleTag={(t) => toggleFacet(setTagFacet, t)}
+                            />
+                        )}
+
+                        {/* Desktop table with auto height & scroll when needed */}
+                        {!isMobile && (
+                            <div className="md:max-h-[60vh] xl:max-h-[66vh] overflow-auto">
+                                <Table className="zebra">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Author(s)</TableHead>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead className="md:whitespace-nowrap">Tags</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {fullyFiltered.map((p) => {
+                                        const isSel = p.slug === selectedPost?.slug;
+                                        const ext = (p as any).external as string | undefined;
+
+                                        return (
+                                            <TableRow
+                                                key={p.slug}
+                                                className={`${isSel ? "bg-muted-40" : ""} cursor-pointer`}
+                                                onClick={() => {
+                                                    setSelected(p.slug);
+                                                    // desktop keeps inline selection; mobile handled by MobilePosts above
+                                                }}
+                                                onDoubleClick={() => (window.location.href = ext ? ext : `/${p.slug}/`)}
+                                            >
+                                                {/* align top so multi-line title doesn’t look cramped */}
+                                                <TableCell className="whitespace-nowrap align-top">
+                                                    <time dateTime={p.date}>
+                                                        {new Date(p.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}
+                                                    </time>
+                                                </TableCell>
+
+                                                <TableCell className="whitespace-nowrap align-top">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {(((p as any).authors ?? []) as string[]).length
+                                                            ? (((p as any).authors as string[]).map((a) => (
+                                                                <Pill
+                                                                    key={a}
+                                                                    variant={authorFacet.has(a) ? "solid" : "soft"}
+                                                                    onClick={(e) => { e.stopPropagation(); toggleFacet(setAuthorFacet, a); }}
+                                                                >
+                                                                    {a}
+                                                                </Pill>
+                                                            )))
+                                                            : "—"}
+                                                    </div>
+                                                </TableCell>
+
+                                                {/* Title cell: extra padding ONLY when wrapped */}
+                                                <TitleCell title={p.title} slug={p.slug} external={ext} />
+
+                                                <TableCell className="align-top">
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {(((p as any).tags ?? []) as string[]).map((t) => (
+                                                            <Pill
+                                                                key={t}
+                                                                variant={tagFacet.has(t) ? "solid" : "soft"}
+                                                                onClick={(e) => { e.stopPropagation(); toggleFacet(setTagFacet, t); }}
+                                                            >
+                                                                {t}
+                                                            </Pill>
+                                                        ))}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                    {fullyFiltered.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="py-6 text-muted-foreground">
+                                                No results. Try clearing facets or the query.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                        )}
+                    </Panel>
+
+            </div>
+
+            {/* RIGHT META (sticky under header) */}
+            <aside className="order-3 space-y-4 hidden md:block">
+                <Panel header="Selected Post" className="sticky top-[calc(var(--header-h)+8px)]">
+                    {!selectedPost ? (
+                        <p className="text-muted-foreground text-sm">Nothing selected.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            <h2 className="text-base font-semibold">{selectedPost.title}</h2>
+                            <p className="text-xs text-muted-foreground">
+                                <time dateTime={selectedPost.date}>
+                                    {new Date(selectedPost.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" })}
+                                </time>
+                            </p>
+
+                            {(((selectedPost as any).authors ?? []) as string[]).length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                    {(((selectedPost as any).authors) as string[]).map((a) => (
+                                        <Pill
+                                            key={a}
+                                            variant={authorFacet.has(a) ? "solid" : "soft"}
+                                            onClick={() => toggleFacet(setAuthorFacet, a)}
+                                        >
+                                            {a}
+                                        </Pill>
+
+                                    ))}
+                                </div>
+                            )}
+                                {(selectedPost as any).description && (
+                                    <InfoBox className="break-words">{(selectedPost as any).description}</InfoBox>
+                                )}
+
+
+                            {(((selectedPost as any).tags ?? []) as string[]).length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                    {(((selectedPost as any).tags) as string[]).map((t) => (
+                                        <Pill
+                                            key={t}
+                                            variant={tagFacet.has(t) ? "solid" : "soft"}
+                                            onClick={() => toggleFacet(setTagFacet, t)}
+                                        >
+                                            {t}
+                                        </Pill>
+
+                                    ))}
+                                </div>
+                            )}
+
+                            {(selectedPost as any).readingTime && (
+                                <p className="text-xs text-muted-foreground">~{(selectedPost as any).readingTime} min read</p>
+                            )}
+
+                            <div className="pt-1">
+                                {((selectedPost as any).external as string | undefined) ? (
+                                    <a href={(selectedPost as any).external as string} className="text-primary underline inline-flex items-center gap-1">
+                                        Open <ExternalLink className="h-4 w-4 flex-none shrink-0" />
+                                    </a>
+                                ) : (
+                                    <Link href={`/${selectedPost.slug}/`} className="text-primary underline">
+                                        Open
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </Panel>
+            </aside>
+        </div>
+            <MobilePostSheet
+                open={mobileSheetOpen}
+                onOpenChange={setMobileSheetOpen}
+                post={selectedPost}
+            />
+        </>
+    );
+}
