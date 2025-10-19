@@ -1,8 +1,0 @@
-name = "ircc-siem-gruvbox"
-license = "MIT"
-licenselink = "https://opensource.org/licenses/MIT"
-description = "Gruvbox-dark SIEM-style theme for IRCC (DFIR blog)"
-homepage = "https://irchaos.club"
-tags = ["dfir", "siem", "dark", "gruvbox", "blog", "minimal"]
-features = ["authors facet", "tags facet"]
-min_version = "0.114.0"
