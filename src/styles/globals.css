@@ -311,50 +311,65 @@
 
 /* Mobile-friendly blog post styles */
 @layer utilities {
-    /* Ensure prose content respects mobile boundaries */
+    /* Force prose content to respect viewport boundaries */
     .prose {
-        max-width: 100% !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         word-wrap: break-word;
         overflow-wrap: break-word;
         hyphens: auto;
+        overflow-x: hidden !important;
+    }
+
+    /* Aggressive container constraints */
+    .prose * {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Mobile-friendly code blocks */
     .prose pre {
-        max-width: 100%;
+        max-width: calc(100vw - 2rem) !important;
         overflow-x: auto;
         white-space: pre;
         word-wrap: normal;
         word-break: normal;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
 
     .prose pre code {
         white-space: pre;
         word-wrap: normal;
         word-break: normal;
+        max-width: 100% !important;
     }
 
     /* Mobile-friendly inline code */
     .prose :where(code):not(:where([class~="not-prose"] *)) {
-        word-break: break-word;
+        word-break: break-all !important;
         white-space: pre-wrap;
+        max-width: 100% !important;
     }
 
-    /* Mobile-friendly tables */
+    /* Mobile-friendly tables - force horizontal scroll */
     .prose table {
         width: 100%;
-        max-width: 100%;
+        max-width: calc(100vw - 2rem) !important;
         overflow-x: auto;
         display: block;
         white-space: nowrap;
+        margin: 1rem 0 !important;
     }
 
     .prose thead,
     .prose tbody,
     .prose tr {
         display: table;
-        width: 100%;
-        table-layout: fixed;
+        width: max-content;
+        min-width: 100%;
+        table-layout: auto;
     }
 
     .prose th,
@@ -362,36 +377,55 @@
         word-wrap: break-word;
         word-break: break-word;
         hyphens: auto;
-        min-width: 100px;
-    }
-
-    /* Long URLs and text in tables */
-    .prose td {
+        min-width: 80px;
+        max-width: 200px;
         white-space: normal;
+        padding: 0.5rem !important;
     }
 
-    /* Prevent images from overflowing */
+    /* Aggressively constrain images */
     .prose img {
-        max-width: 100% !important;
+        max-width: calc(100vw - 2rem) !important;
+        width: 100% !important;
         height: auto !important;
         display: block;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 1rem auto !important;
+        object-fit: contain;
     }
 
-    /* Responsive container adjustments */
+    /* Aggressive mobile constraints */
     @media (max-width: 768px) {
+        /* Force everything to respect viewport */
         .prose {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
+
+        .prose > * {
+            max-width: calc(100vw - 1rem) !important;
+            margin-left: 0.5rem !important;
+            margin-right: 0.5rem !important;
         }
         
+        /* Severely constrain images on mobile */
+        .prose img {
+            max-width: calc(100vw - 1rem) !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0.5rem auto !important;
+        }
+
         /* Make table scrollable on very small screens */
         .prose table {
-            font-size: 0.875rem;
+            font-size: 0.75rem !important;
             white-space: nowrap;
-            overflow-x: scroll;
+            overflow-x: auto;
             display: block;
+            max-width: calc(100vw - 1rem) !important;
+            margin: 0.5rem auto !important;
         }
         
         .prose table thead,
@@ -402,37 +436,60 @@
             min-width: 100%;
         }
 
-        /* Adjust code block font size for mobile */
+        /* Constrain code blocks aggressively */
         .prose pre {
-            font-size: 0.75rem;
-            padding: 0.75rem;
-            margin: 1rem 0;
+            font-size: 0.65rem !important;
+            padding: 0.5rem !important;
+            margin: 0.5rem 0 !important;
+            max-width: calc(100vw - 1rem) !important;
+            overflow-x: auto !important;
         }
 
-        /* Better spacing for mobile */
+        .prose code {
+            font-size: 0.75rem !important;
+            word-break: break-all !important;
+        }
+
+        /* Better mobile typography */
+        .prose h1 { font-size: 1.75rem !important; line-height: 1.2 !important; }
+        .prose h2 { font-size: 1.5rem !important; line-height: 1.3 !important; }
+        .prose h3 { font-size: 1.25rem !important; line-height: 1.4 !important; }
+        .prose h4 { font-size: 1.125rem !important; line-height: 1.4 !important; }
+
         .prose h1,
         .prose h2,
         .prose h3,
         .prose h4,
         .prose h5,
         .prose h6 {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+            hyphens: auto !important;
+            margin-left: 0.5rem !important;
+            margin-right: 0.5rem !important;
         }
 
         /* Handle long URLs and links better on mobile */
         .prose a {
-            word-break: break-all;
-            overflow-wrap: break-word;
+            word-break: break-all !important;
+            overflow-wrap: break-word !important;
         }
 
         /* Handle blockquotes on mobile */
         .prose blockquote {
-            margin-left: 0;
-            margin-right: 0;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            margin-left: 0.5rem !important;
+            margin-right: 0.5rem !important;
+            padding-left: 1rem !important;
+            padding-right: 0.5rem !important;
+            max-width: calc(100vw - 1rem) !important;
+        }
+
+        /* Paragraphs and lists */
+        .prose p,
+        .prose ul,
+        .prose ol {
+            margin-left: 0.5rem !important;
+            margin-right: 0.5rem !important;
         }
     }
 
@@ -449,5 +506,25 @@
     .prose code:not(pre code) {
         word-break: break-all;
         white-space: pre-wrap;
+    }
+
+    /* Mobile content wrapper */
+    .mobile-content-wrapper {
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-content-wrapper {
+            overflow-x: hidden !important;
+            max-width: calc(100vw - 1rem) !important;
+            width: calc(100vw - 1rem) !important;
+            margin: 0 auto !important;
+        }
+
+        .mobile-content-wrapper * {
+            max-width: 100% !important;
+        }
     }
 }

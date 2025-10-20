@@ -47,9 +47,9 @@ export default function PostPage({ post }: { post: Post }) {
                     </>
                 )}
             </Head>
-            <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6 min-w-0">
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8 min-w-0">
-                    <article className="prose prose-invert mt-6 mx-auto max-w-[90ch] lg:max-w-[100ch] min-w-0 overflow-hidden">
+            <div className="mx-auto w-full max-w-[1400px] px-2 sm:px-3 md:px-6 min-w-0">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8 min-w-0 max-w-full">
+                    <article className="prose prose-invert mt-6 mx-auto w-full max-w-full sm:max-w-[90ch] lg:max-w-[100ch] min-w-0 overflow-hidden px-0">
                         <h1>{post.title}</h1>
                         <p className="text-sm text-muted-foreground">
                             <time dateTime={post.date}>
@@ -88,7 +88,7 @@ export default function PostPage({ post }: { post: Post }) {
                             </div>
                         )}
                         
-                        <div id="post-body" className="mt-6" dangerouslySetInnerHTML={{ __html: post.body.html }} />
+                        <div id="post-body" className="mt-6 mobile-content-wrapper" dangerouslySetInnerHTML={{ __html: post.body.html }} />
                     </article>
                     {/* shadcn TOC (hidden on smaller screens) */}
                     <aside className="hidden xl:block py-8">
