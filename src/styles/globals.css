@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-specific behavior */
+@media (max-width: 767px) {
+    /* Hide footer on mobile */
+    footer {
+        display: none !important;
+    }
+    
+    /* Center title and date on mobile */
+    .mobile-article.prose.prose-invert h1 {
+        text-align: center !important;
+    }
+    
+    .mobile-article .text-sm.text-muted-foreground {
+        text-align: center !important;
+    }
+}
+
 /* ---------- Gruvbox DARK palette (from your image) ---------- */
 /* raw palette (kept as g- variables for reuse anywhere) */
 :root {
@@ -508,23 +525,93 @@
         white-space: pre-wrap;
     }
 
-    /* Mobile content wrapper */
-    .mobile-content-wrapper {
-        overflow-x: hidden !important;
-        max-width: 100% !important;
-        width: 100% !important;
-    }
-
+    /* Mobile article overrides - simplified */
     @media (max-width: 768px) {
-        .mobile-content-wrapper {
-            overflow-x: hidden !important;
-            max-width: calc(100vw - 1rem) !important;
-            width: calc(100vw - 1rem) !important;
-            margin: 0 auto !important;
+        .mobile-article {
+            max-width: 100vw;
+            width: 100%;
+            padding: 0 1rem;
+            margin: 0;
         }
 
-        .mobile-content-wrapper * {
-            max-width: 100% !important;
+        /* Override all prose children with highest specificity */
+        .mobile-article.prose.prose-invert * {
+            max-width: calc(100vw - 1rem) !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Images - force small size on mobile */
+        .mobile-article.prose.prose-invert img {
+            max-width: calc(100vw - 1rem) !important;
+            width: 100% !important;
+            height: auto !important;
+            margin: 0.5rem 0 !important;
+            display: block !important;
+        }
+
+        /* Code blocks - work with existing highlight.css structure */
+        .mobile-article.prose.prose-invert pre {
+            max-width: calc(100vw - 2rem) !important;
+            overflow-x: auto !important;
+            margin: 0.5rem 0 !important;
+            /* Keep existing transparent background from highlight.css */
+        }
+        
+        .mobile-article.prose.prose-invert pre code.hljs {
+            font-size: 0.7rem !important;
+            padding: 0.5rem !important;
+            /* Override the fixed padding from highlight.css on mobile */
+            width: max-content !important;
+            min-width: 100% !important;
+            /* This ensures background extends with content */
+        }
+
+        /* Tables - force small and scrollable */
+        .mobile-article.prose.prose-invert table {
+            max-width: calc(100vw - 1rem) !important;
+            font-size: 0.7rem !important;
+            display: block !important;
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            margin: 0.5rem 0 !important;
+        }
+
+        /* Headings */
+        .mobile-article.prose.prose-invert h1,
+        .mobile-article.prose.prose-invert h2,
+        .mobile-article.prose.prose-invert h3,
+        .mobile-article.prose.prose-invert h4,
+        .mobile-article.prose.prose-invert h5,
+        .mobile-article.prose.prose-invert h6 {
+            font-size: clamp(1rem, 4vw, 1.5rem) !important;
+            line-height: 1.3 !important;
+            margin: 0.75rem 0 0.5rem 0 !important;
+            word-break: break-word !important;
+        }
+
+        /* Paragraphs and lists */
+        .mobile-article.prose.prose-invert p,
+        .mobile-article.prose.prose-invert ul,
+        .mobile-article.prose.prose-invert ol,
+        .mobile-article.prose.prose-invert li {
+            font-size: 0.9rem !important;
+            line-height: 1.5 !important;
+            margin: 0.5rem 0 !important;
+            word-break: break-word !important;
+        }
+
+        /* Links and inline code */
+        .mobile-article.prose.prose-invert a,
+        .mobile-article.prose.prose-invert code:not(pre code) {
+            word-break: break-all !important;
+            overflow-wrap: break-word !important;
+        }
+
+        /* Blockquotes */
+        .mobile-article.prose.prose-invert blockquote {
+            margin: 0.5rem 0 !important;
+            padding: 0.5rem 1rem !important;
+            font-size: 0.85rem !important;
         }
     }
 }

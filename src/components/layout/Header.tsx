@@ -3,21 +3,26 @@ import { Rss } from "lucide-react";
 
 export default function Header() {
     return (
-        <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur shrink-0">
-            <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6 py-4 md:py-5">
+        <header className="relative md:sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur shrink-0">
+            <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6 py-2 md:py-5">
                 <div className="flex items-center justify-between gap-4">
                     <Link href="/" className="group">
                         <div className="leading-tight">
-                            <div className="text-sm md:text-xl font-mono tracking-wide text-primary">
+                            {/* Mobile: Just "IRCC" */}
+                            <div className="block md:hidden text-lg font-mono tracking-wide text-primary">
+                                IRCC
+                            </div>
+                            {/* Desktop: Full title */}
+                            <div className="hidden md:block text-xl font-mono tracking-wide text-primary">
                                 IRCC — Incident Response Chaos Club
                             </div>
-                            <div className="text-sm md:text-base text-muted-foreground">
+                            <div className="hidden md:block text-base text-muted-foreground">
                                 Incident response can be chaotic
                             </div>
                         </div>
                     </Link>
 
-                    <nav className="flex items-center gap-4 text-sm">
+                    <nav className="flex items-center gap-2 md:gap-4 text-xs md:text-sm">
                         <Link href="/about" className="hover:underline">
                             About
                         </Link>
@@ -33,9 +38,9 @@ export default function Header() {
                             href="/rss.xml"
                             aria-label="RSS feed"
                             title="RSS feed"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border hover:bg-muted transition-colors"
+                            className="inline-flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-md border hover:bg-muted transition-colors"
                         >
-                            <Rss className="h-4 w-4 text-orange-500" />
+                            <Rss className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
                             <span className="sr-only">RSS</span>
                         </Link>
                     </nav>
