@@ -759,7 +759,8 @@
 .theme-gruvbox-dark .prose-theme,
 .theme-solarized-dark .prose-theme,
 .theme-uwu .prose-theme,
-.theme-oxocarbon .prose-theme {
+.theme-oxocarbon .prose-theme,
+.theme-catppuccin-mocha .prose-theme {
     --prose-body: var(--foreground);
     --prose-headings: var(--foreground);
     --prose-lead: var(--muted-foreground);
@@ -1108,6 +1109,29 @@
     --border: #393939;
     --input: #393939;
     --ring: #33b1ff;
+}
+
+/* Catppuccin Mocha Theme */
+.theme-catppuccin-mocha {
+    --background: #1e1e2e;      /* Base */
+    --foreground: #cdd6f4;      /* Text */
+    --card: #313244;            /* Surface0 */
+    --card-foreground: #cdd6f4; /* Text */
+    --popover: #45475a;         /* Surface1 */
+    --popover-foreground: #cdd6f4; /* Text */
+    --primary: #cba6f7;         /* Mauve */
+    --primary-foreground: #1e1e2e; /* Base */
+    --secondary: #fab387;       /* Peach */
+    --secondary-foreground: #1e1e2e; /* Base */
+    --muted: #45475a;          /* Surface1 */
+    --muted-foreground: #a6adc8; /* Subtext0 */
+    --accent: #94e2d5;         /* Teal */
+    --accent-foreground: #1e1e2e; /* Base */
+    --destructive: #f38ba8;    /* Red */
+    --destructive-foreground: #1e1e2e; /* Base */
+    --border: #585b70;         /* Surface2 */
+    --input: #45475a;          /* Surface1 */
+    --ring: #cba6f7;           /* Mauve */
 }
 
 /* Internal Post Styling */

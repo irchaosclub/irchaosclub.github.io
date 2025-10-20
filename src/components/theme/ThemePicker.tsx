@@ -66,6 +66,15 @@ const themes: Theme[] = [
       text: '#f4f4f4',
       accent: '#33b1ff'
     }
+  },
+  {
+    name: 'Catppuccin Mocha',
+    id: 'catppuccin-mocha',
+    preview: {
+      bg: '#1e1e2e',
+      text: '#cdd6f4',
+      accent: '#cba6f7'
+    }
   }
 ];
 
