@@ -4,10 +4,8 @@
     "scripts": {
         "dev": "concurrently \"contentlayer dev\" \"next dev\"",
         "build": "contentlayer build && next build && next export",
-        "rss": "node scripts/generate-rss.mjs",
-        "postexport": "node -e \"const fs=require('fs');if(fs.existsSync('public/rss.xml')){fs.copyFileSync('public/rss.xml','out/rss.xml');console.log('Copied RSS to out/');}else{console.error('Missing public/rss.xml');process.exit(1);}\"",
-        "start": "next start",
-        "static": "npm run build && npm run export",
+        "rss:out": "node scripts/generate-rss.mjs out/rss.xml",
+        "static": "npm run build && npm run export && npm run rss:out",
         "export": "next export"
     },
     "dependencies": {

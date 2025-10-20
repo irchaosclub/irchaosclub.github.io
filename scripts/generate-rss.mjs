@@ -85,7 +85,7 @@ ${itemsXml}
 </rss>
 `;
 
-const dest = path.join(process.cwd(), "public", "rss.xml");
+const dest = process.argv[2] ?? path.join(process.cwd(), "public", "rss.xml");
 await fs.mkdir(path.dirname(dest), { recursive: true });
 await fs.writeFile(dest, xml, "utf8");
-console.log(`[generate-rss] ✔ Wrote public/rss.xml with ${posts.length} item(s).`);
+console.log(`[generate-rss] ✔ Wrote ${dest} with ${posts.length} item(s).`);
