@@ -81,20 +81,28 @@
 @layer base {
     * {
         @apply border-border;
+        box-sizing: border-box;
     }
 
-    html,
-    body {
-        height: 100%;
+    html {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
     }
 
     body {
+        height: 100vh;
+        height: 100dvh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
         @apply bg-background text-foreground;
         background-image:
             radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
             linear-gradient(transparent 0, rgba(255, 255, 255, 0.025) 1px);
         background-size: 22px 22px, 100% 2px;
         background-repeat: repeat, repeat;
+        background-attachment: fixed;
     }
 }
 
@@ -227,5 +235,76 @@
 @layer components {
     .kbd {
         @apply rounded border border-border bg-muted/20 px-1.5 py-0.5 font-mono text-xs;
+    }
+}
+
+/* Ensure no unwanted scrollbars */
+@layer base {
+    #__next {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+    
+    /* Hide scrollbar in main content area while keeping scroll functionality */
+    main {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+    
+    main::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+    
+    /* Hide footer on small screens */
+    html.hide-footer footer {
+        display: none;
+    }
+    
+    /* Custom scrollbar styling for posts list */
+    .posts-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: var(--g-bg3) var(--g-bg1);
+    }
+    
+    .posts-scrollbar::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .posts-scrollbar::-webkit-scrollbar-track {
+        background: var(--g-bg1);
+        border-radius: 4px;
+    }
+    
+    .posts-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--g-bg3);
+        border-radius: 4px;
+        border: 1px solid var(--g-bg2);
+    }
+    
+    .posts-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--g-bg4);
+    }
+    
+    /* Posts container with fade effect */
+    .posts-container {
+        position: relative;
+    }
+    
+    .posts-container::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 32px;
+        background: linear-gradient(to bottom, transparent, var(--card));
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    /* Add spacing after the last table row */
+    .posts-table tbody tr:last-child td {
+        padding-bottom: 24px;
     }
 }

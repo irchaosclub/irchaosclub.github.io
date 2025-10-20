@@ -158,6 +158,10 @@ export default function Home({ posts }: Props) {
 
     const [isMobile, setIsMobile] = useState(false);
     const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+    const [showHistogram, setShowHistogram] = useState(true);
+    const [showFooter, setShowFooter] = useState(true);
+    const [accordionOpenSections, setAccordionOpenSections] = useState(["time", "authors", "tags"]);
+    
 
     useEffect(() => {
         const mq = window.matchMedia("(max-width: 767px)");
@@ -167,6 +171,85 @@ export default function Home({ posts }: Props) {
         return () => mq.removeEventListener?.("change", set);
     }, []);
 
+    useEffect(() => {
+        const checkHeight = () => {
+            const viewportHeight = window.innerHeight;
+            // Hide histogram and footer when viewport height is less than 900px
+            setShowHistogram(viewportHeight >= 900);
+            setShowFooter(viewportHeight >= 1000);
+            
+            // Progressive accordion collapse based on height
+            if (viewportHeight >= 800) {
+                // Full height: show all sections
+                setAccordionOpenSections(["time", "authors", "tags"]);
+            } else if (viewportHeight >= 650) {
+                // Medium height: collapse tags (least important)
+                setAccordionOpenSections(["time", "authors"]);
+            } else {
+                // Small height: only keep time (most important)
+                setAccordionOpenSections(["time"]);
+            }
+        };
+        
+        checkHeight();
+        window.addEventListener("resize", checkHeight);
+        window.addEventListener("orientationchange", checkHeight);
+        return () => {
+            window.removeEventListener("resize", checkHeight);
+            window.removeEventListener("orientationchange", checkHeight);
+        };
+    }, []);
+
+    const scrollWrapRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        if (isMobile) return;
+        const el = scrollWrapRef.current;
+        if (!el) return;
+
+        const cssPixels = () =>
+            Math.min(
+                window.visualViewport?.height ?? Infinity,
+                window.innerHeight ?? Infinity,
+                document.documentElement.clientHeight ?? Infinity
+            );
+
+        const outerHeight = (node: Element | null) => {
+            if (!node) return 0;
+            const r = node.getBoundingClientRect();
+            const cs = getComputedStyle(node as HTMLElement);
+            return r.height + parseFloat(cs.marginTop || "0") + parseFloat(cs.marginBottom || "0");
+        };
+
+        const compute = () => {
+            const viewportH = cssPixels();
+            const top = el.getBoundingClientRect().top;
+            const footer = document.querySelector("footer");
+            // Only account for footer height if it's visible
+            const footerH = showFooter ? outerHeight(footer) : 0;
+            const gap = showFooter ? 24 : 12; // less gap when footer is hidden
+
+            // Calculate max height to prevent underflow under footer (or bottom of screen)
+            const maxH = viewportH - top - footerH - gap;
+            
+            // Set maxHeight but allow content to determine actual height
+            el.style.maxHeight = `${Math.max(200, maxH)}px`;
+            // Don't force a specific height, let content size naturally
+            el.style.height = 'auto';
+        };
+
+        compute();
+        const ro = new ResizeObserver(compute);
+        const footerEl = document.querySelector("footer");
+        if (footerEl) ro.observe(footerEl);
+        window.addEventListener("resize", compute);
+        window.addEventListener("orientationchange", compute);
+        return () => {
+            ro.disconnect();
+            window.removeEventListener("resize", compute);
+            window.removeEventListener("orientationchange", compute);
+        };
+    }, [isMobile, showFooter]);
+
     // state
     const [query, setQuery] = useState("");
     const [range, setRange] = useState<{ start: Date; end: Date } | null>(null);
@@ -174,7 +257,10 @@ export default function Home({ posts }: Props) {
     const [authorFacet, setAuthorFacet] = useState<Set<string>>(new Set());
     const [tagFacet, setTagFacet] = useState<Set<string>>(new Set());
     const [daysFacet, setDaysFacet] = useState<number | null>(null);
-    const [searchFocused, setSearchFocused] = useState(false);
+
+
+
+
 
 
     // query parse
@@ -265,6 +351,7 @@ export default function Home({ posts }: Props) {
         });
     }, [filteredByQuery, range, quickRange, authorFacet, tagFacet]);
 
+
     // current selection
     const selectedPost = useMemo(
         () => fullyFiltered.find((p) => p.slug === selected) ?? fullyFiltered[0] ?? null,
@@ -311,16 +398,30 @@ export default function Home({ posts }: Props) {
         setQuery((cur) => (cur ? `${cur} ${snippet}` : snippet));
     }
 
+    // Add/remove class to document to control footer visibility
+    useEffect(() => {
+        if (showFooter) {
+            document.documentElement.classList.remove('hide-footer');
+        } else {
+            document.documentElement.classList.add('hide-footer');
+        }
+        return () => {
+            document.documentElement.classList.remove('hide-footer');
+        };
+    }, [showFooter]);
+
     // ---------- JSX ----------
     return (
-        <>
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(300px,340px)] gap-5">
-            {/* LEFT FACETS (sticky under header) */}
-            <aside className="order-2 xl:order-1">
-                <Panel header="Facets" description="Refine the result set" className="sticky top-[calc(var(--header-h)+8px)]">
-
-                    <Accordion type="multiple" defaultValue={["time", "authors", "tags"]} className="space-y-1">
-                        <AccordionItem value="time">
+        
+        <div className="overflow-x-hidden">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(300px,340px)] gap-5 min-h-0 px-4 md:px-6 xl:px-8 overflow-hidden">                <aside className="order-2 xl:order-1">
+                    <Panel
+                        header="Facets"
+                        description="Refine the result set"
+                        className="sticky top-[calc(var(--header-h)+8px)]"
+                     >
+                        <Accordion type="multiple" value={accordionOpenSections} onValueChange={setAccordionOpenSections} className="space-y-1">
+                            <AccordionItem value="time">
                             <AccordionTrigger>Time</AccordionTrigger>
                             <AccordionContent>
                                 <div className="grid grid-cols-2 gap-2">
@@ -386,8 +487,8 @@ export default function Home({ posts }: Props) {
             </aside>
 
             {/* CENTER (offset to align with sticky side panels) */}
-            <div className="order-1 xl:order-2 space-y-4 mt-[calc(var(--header-h)+8px)]">
-                <Panel
+                <div className="order-1 xl:order-2 flex flex-col gap-4 mt-[calc(var(--header-h)+8px)] min-h-0">
+                    <Panel
                     header="Search"
                     description={<>Type queries like <code>author:humpty tag:reverse after:2025-01-01</code></>}
                     action={
@@ -420,7 +521,7 @@ export default function Home({ posts }: Props) {
                 </Panel>
 
 
-                    {!isMobile && (
+                    {!isMobile && showHistogram && (
                         <Panel header="New Posts" description="Monthly volume of new posts">
                             <PostAreaInteractive bins={bins} />
                         </Panel>
@@ -429,8 +530,7 @@ export default function Home({ posts }: Props) {
 
 
 
-                    <Panel header={`Posts (${fullyFiltered.length})`}>
-                        {/* Mobile list (no cramped table) */}
+                    <Panel header={`Posts (${fullyFiltered.length})`} className="[&>*:last-child]:p-0">                        {/* Mobile list unchanged */}
                         {isMobile && (
                             <MobilePosts
                                 posts={fullyFiltered}
@@ -442,93 +542,104 @@ export default function Home({ posts }: Props) {
                             />
                         )}
 
-                        {/* Desktop table with auto height & scroll when needed */}
+                        {/* Desktop: scrollable table that fills the remaining height */}
                         {!isMobile && (
-                            <div className="md:max-h-[60vh] xl:max-h-[66vh] overflow-auto">
-                                <Table className="zebra">
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Author(s)</TableHead>
-                                        <TableHead>Title</TableHead>
-                                        <TableHead className="md:whitespace-nowrap">Tags</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {fullyFiltered.map((p) => {
-                                        const isSel = p.slug === selectedPost?.slug;
-                                        const ext = (p as any).external as string | undefined;
-
-                                        return (
-                                            <TableRow
-                                                key={p.slug}
-                                                className={`${isSel ? "bg-muted-40" : ""} cursor-pointer`}
-                                                onClick={() => {
-                                                    setSelected(p.slug);
-                                                    // desktop keeps inline selection; mobile handled by MobilePosts above
-                                                }}
-                                                onDoubleClick={() => (window.location.href = ext ? ext : `/${p.slug}/`)}
-                                            >
-                                                {/* align top so multi-line title doesn’t look cramped */}
-                                                <TableCell className="whitespace-nowrap align-top">
-                                                    <time dateTime={p.date}>
-                                                        {new Date(p.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}
-                                                    </time>
-                                                </TableCell>
-
-                                                <TableCell className="whitespace-nowrap align-top">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {(((p as any).authors ?? []) as string[]).length
-                                                            ? (((p as any).authors as string[]).map((a) => (
-                                                                <Pill
-                                                                    key={a}
-                                                                    variant={authorFacet.has(a) ? "solid" : "soft"}
-                                                                    onClick={(e) => { e.stopPropagation(); toggleFacet(setAuthorFacet, a); }}
-                                                                >
-                                                                    {a}
-                                                                </Pill>
-                                                            )))
-                                                            : "—"}
-                                                    </div>
-                                                </TableCell>
-
-                                                {/* Title cell: extra padding ONLY when wrapped */}
-                                                <TitleCell title={p.title} slug={p.slug} external={ext} />
-
-                                                <TableCell className="align-top">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {(((p as any).tags ?? []) as string[]).map((t) => (
-                                                            <Pill
-                                                                key={t}
-                                                                variant={tagFacet.has(t) ? "solid" : "soft"}
-                                                                onClick={(e) => { e.stopPropagation(); toggleFacet(setTagFacet, t); }}
-                                                            >
-                                                                {t}
-                                                            </Pill>
-                                                        ))}
-                                                    </div>
-                                                </TableCell>
+                            <div className="posts-container">
+                                <div
+                                    ref={scrollWrapRef}
+                                    className="overflow-y-auto overflow-x-hidden posts-scrollbar"
+                                    style={{ 
+                                        scrollbarGutter: "stable both-edges",
+                                        height: "fit-content",
+                                        maxHeight: "60vh"
+                                    }}
+                                >
+                                    <Table className="zebra w-full posts-table">
+                                        <TableHeader className="sticky top-0 z-10 bg-card">
+                                            <TableRow>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Author(s)</TableHead>
+                                                <TableHead>Title</TableHead>
+                                                <TableHead className="md:whitespace-nowrap">Tags</TableHead>
                                             </TableRow>
-                                        );
-                                    })}
-                                    {fullyFiltered.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={4} className="py-6 text-muted-foreground">
-                                                No results. Try clearing facets or the query.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {fullyFiltered.map((p) => {
+                                                const isSel = p.slug === selectedPost?.slug;
+                                                const ext = (p as any).external as string | undefined;
+                                                return (
+                                                    <TableRow
+                                                        key={p.slug}
+                                                        className={`${isSel ? "bg-muted-40" : ""} cursor-pointer`}
+                                                        onClick={() => setSelected(p.slug)}
+                                                        onDoubleClick={() => (window.location.href = ext ? ext : `/${p.slug}/`)}
+                                                    >
+                                                        <TableCell className="whitespace-nowrap align-top">
+                                                            <time dateTime={p.date}>
+                                                                {new Date(p.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}
+                                                            </time>
+                                                        </TableCell>
+
+                                                        <TableCell className="whitespace-nowrap align-top">
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {(((p as any).authors ?? []) as string[]).length
+                                                                    ? (((p as any).authors as string[]).map((a) => (
+                                                                        <Pill
+                                                                            key={a}
+                                                                            variant={authorFacet.has(a) ? "solid" : "soft"}
+                                                                            onClick={(e) => { e.stopPropagation(); toggleFacet(setAuthorFacet, a); }}
+                                                                        >
+                                                                            {a}
+                                                                        </Pill>
+                                                                    )))
+                                                                    : "—"}
+                                                            </div>
+                                                        </TableCell>
+
+                                                        <TitleCell title={p.title} slug={p.slug} external={ext} />
+
+                                                        <TableCell className="align-top">
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {(((p as any).tags ?? []) as string[]).map((t) => (
+                                                                    <Pill
+                                                                        key={t}
+                                                                        variant={tagFacet.has(t) ? "solid" : "soft"}
+                                                                        onClick={(e) => { e.stopPropagation(); toggleFacet(setTagFacet, t); }}
+                                                                    >
+                                                                        {t}
+                                                                    </Pill>
+                                                                ))}
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+
+                                            {fullyFiltered.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={4} className="py-6 text-muted-foreground">
+                                                        No results. Try clearing facets or the query.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </div>
                         )}
+
+
                     </Panel>
+
 
             </div>
 
             {/* RIGHT META (sticky under header) */}
             <aside className="order-3 space-y-4 hidden md:block">
-                <Panel header="Selected Post" className="sticky top-[calc(var(--header-h)+8px)]">
+                <Panel
+                header="Selected Post"
+                    className="sticky top-[calc(var(--header-h)+8px)]"
+                >
                     {!selectedPost ? (
                         <p className="text-muted-foreground text-sm">Nothing selected.</p>
                     ) : (
@@ -593,12 +704,12 @@ export default function Home({ posts }: Props) {
                     )}
                 </Panel>
             </aside>
-        </div>
+            </div>
             <MobilePostSheet
                 open={mobileSheetOpen}
                 onOpenChange={setMobileSheetOpen}
                 post={selectedPost}
             />
-        </>
+        </div>
     );
 }

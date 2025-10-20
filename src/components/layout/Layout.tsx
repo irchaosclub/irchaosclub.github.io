@@ -1,14 +1,16 @@
 import Header from "./Header";
+import Footer from "./Footer";
 import { ReactNode } from "react";
 
-export default function Layout({ children }: { children: ReactNode }) {
+// Layout.tsx
+export default function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <>
+        <div className="h-dvh grid grid-rows-[auto,1fr,auto] overflow-hidden">
             <Header />
-            {/* way wider on desktop */}
-            <main className="mx-auto w-full max-w-[1800px] 2xl:max-w-[1920px] px-6">
-                {children}
-            </main>
-        </>
+            <main className="min-h-0 overflow-x-hidden overflow-y-auto">{children}</main>
+            <Footer />
+        </div>
     );
 }
+
+
