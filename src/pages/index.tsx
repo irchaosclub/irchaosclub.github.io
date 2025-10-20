@@ -412,7 +412,7 @@ export default function Home({ posts }: Props) {
 
                         {/* Quick tokens remain the same */}
                         <div className="mt-2 flex flex-wrap gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' author:alice' : 'author:alice'))}>author:alice</Button>
+                            <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' author:humpty' : 'author:humpty'))}>author:humpty</Button>
                             <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' tag:reverse' : 'tag:reverse'))}>tag:reverse</Button>
                             <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' after:2025-01-01' : 'after:2025-01-01'))}>after:2025-01-01</Button>
                             <Button variant="outline" size="sm" onClick={() => setQuery((s) => (s ? s + ' before:2025-12-31' : 'before:2025-12-31'))}>before:2025-12-31</Button>

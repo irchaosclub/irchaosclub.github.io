@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { allPosts, Post } from "contentlayer/generated";
+import { TableOfContents } from "@/components/post/TableOfContents";
 
 export async function getStaticPaths() {
     return { paths: allPosts.map((p) => ({ params: { slug: p.slug } })), fallback: false };
@@ -37,15 +38,23 @@ export default function PostPage({ post }: { post: Post }) {
     return (
         <>
             <Head><title>{post.title}</title></Head>
-            <article className="prose prose-invert mx-auto py-8">
-                <h1>{post.title}</h1>
-                <p className="text-sm text-muted-foreground">
-                    <time dateTime={post.date}>
-                        {new Date(post.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" })}
-                    </time>
-                </p>
-                <div className="mt-6" dangerouslySetInnerHTML={{ __html: post.body.html }} />
-            </article>
+            <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8">
+                    <article className="prose prose-invert mt-6 mx-auto max-w-[90ch] lg:max-w-[100ch]">
+                        <h1>{post.title}</h1>
+                        <p className="text-sm text-muted-foreground">
+                            <time dateTime={post.date}>
+                                {new Date(post.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" })}
+                            </time>
+                        </p>
+                              <div id="post-body" className="mt-6" dangerouslySetInnerHTML={{ __html: post.body.html }} />
+                           </article>
+                    {/* shadcn TOC (hidden on smaller screens) */}
+                    <aside className="hidden xl:block py-8">
+                        <TableOfContents target="#post-body" />
+                    </aside>
+                </div>
+            </div>
         </>
     );
 }

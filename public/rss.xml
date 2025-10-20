@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>irchaos.club</title>
+    <link>https://irchaos.club</link>
+    <description>Latest posts from irchaos.club</description>
+    <lastBuildDate>Mon, 20 Oct 2025 03:23:52 GMT</lastBuildDate>
+
+  <item>
+    <title>Markdown Sink Test</title>
+    <link>https://irchaos.club/sink-test</link>
+    <guid isPermaLink="true">https://irchaos.club/sink-test</guid>
+    <pubDate>Sun, 19 Oct 2025 00:00:00 GMT</pubDate>
+    <author>Cedric</author>
+    <category>test</category><category>markdown</category><category>site</category>
+    <description><![CDATA[Exhaustive test of markdown features: headings, images, code, tables, lists, footnotes, etc.]]></description>
+  </item>
+
+  <item>
+    <title>Opened a Can of XWorms</title>
+    <link>https://grepstrength.dev/opened-a-can-of-xworms-33fde9d2aee6</link>
+    <guid isPermaLink="true">https://grepstrength.dev/opened-a-can-of-xworms-33fde9d2aee6</guid>
+    <pubDate>Mon, 29 Sep 2025 09:05:43 GMT</pubDate>
+    <author>grepstrength</author>
+    <category>REM</category><category>malware analysis</category><category>xworm</category><category>RAT</category><category>backdoor</category><category>persistence</category><category>process injection</category>
+    <description><![CDATA[Persistence Personified]]></description>
+  </item>
+
+  <item>
+    <title>Scavenger Malware Distributed via num2words PyPI Supply Chain Compromise</title>
+    <link>https://invokere.com/posts/2025/07/scavenger-malware-distributed-via-num2words-pypi-supply-chain-compromise/</link>
+    <guid isPermaLink="true">https://invokere.com/posts/2025/07/scavenger-malware-distributed-via-num2words-pypi-supply-chain-compromise/</guid>
+    <pubDate>Mon, 28 Jul 2025 00:00:00 GMT</pubDate>
+    <author>invokere</author>
+    <category>threat hunting</category><category>reverse engineering</category><category>scavenger</category><category>pypi</category>
+    <description><![CDATA[A brief report on the num2words PyPI supply-chain compromise that distributed Scavenger malware. It details how a malicious update (v0.5.15 and v0.5.16) injected Windows DLL-loading code into __init__.py, executing the Scavenger Loader which connects to new C2 servers, steals .pypirc credentials, and downloads stealer modules. Includes IoCs, C2 info, and credits to researchers who discovered and analyzed the breach.]]></description>
+  </item>
+
+  <item>
+    <title>Install Linters, Get Malware - DevSecOps Speedrun Edition</title>
+    <link>https://c-b.io/2025-07-20+-+Install+Linters%2C+Get+Malware+-+DevSecOps+Speedrun+Edition</link>
+    <guid isPermaLink="true">https://c-b.io/2025-07-20+-+Install+Linters%2C+Get+Malware+-+DevSecOps+Speedrun+Edition</guid>
+    <pubDate>Sun, 20 Jul 2025 00:00:00 GMT</pubDate>
+    <author>humpty/tony, invokere</author>
+    <category>reverse engineering</category><category>supply chain</category><category>npm</category><category>C++</category>
+    <description><![CDATA[How Scavenger rode a compromised npm eslint-config-prettier: loader/stealer internals, anti-analysis + XXTEA C2, Chromium targeting, BeamNG ties, and actionable IOCs (with InvokeRE)]]></description>
+  </item>
+
+  <item>
+    <title>Supper is served</title>
+    <link>https://c-b.io/2025-06-29+-+Supper+is+served</link>
+    <guid isPermaLink="true">https://c-b.io/2025-06-29+-+Supper+is+served</guid>
+    <pubDate>Sun, 29 Jun 2025 00:00:00 GMT</pubDate>
+    <author>humpty/tony</author>
+    <category>threat hunting</category><category>reverse engineering</category><category>C</category><category>scavenger</category>
+    <description><![CDATA[A deep dive into Supper (Interlock RAT) a fileless Windows backdoor linked to Vice Society clarifying public report errors and detailing its C2 protocol, encryption, self-deletion, and reverse shell behavior.]]></description>
+  </item>
+
+  <item>
+    <title>Analyzing the RedTiger Malware Stealer</title>
+    <link>https://c-b.io/2025-03-16+-+Analyzing+the+RedTiger+Malware+Stealer</link>
+    <guid isPermaLink="true">https://c-b.io/2025-03-16+-+Analyzing+the+RedTiger+Malware+Stealer</guid>
+    <pubDate>Sun, 16 Mar 2025 00:00:00 GMT</pubDate>
+    <author>humpty/tony</author>
+    <category>threat hunting</category><category>reverse engineering</category><category>python</category>
+    <description><![CDATA[Analysis of RedTiger, a python based stealer that leverages Discord to exfiltrate credentials]]></description>
+  </item>
+
+  <item>
+    <title>Dissecting a fresh BlankGrabber sample</title>
+    <link>https://c-b.io/2025-02-15+-+Dissecting+a+fresh+BlankGrabber+sample</link>
+    <guid isPermaLink="true">https://c-b.io/2025-02-15+-+Dissecting+a+fresh+BlankGrabber+sample</guid>
+    <pubDate>Sat, 15 Feb 2025 00:00:00 GMT</pubDate>
+    <author>humpty/tony</author>
+    <category>reverse engineering</category><category>python</category>
+    <description><![CDATA[Analysis of BlankGrabber, a python based stealer]]></description>
+  </item>
+
+  <item>
+    <title>Threat hunting for shits and giggles</title>
+    <link>https://c-b.io/2024-11-28+-+Threat+hunting+for+shits+and+giggles</link>
+    <guid isPermaLink="true">https://c-b.io/2024-11-28+-+Threat+hunting+for+shits+and+giggles</guid>
+    <pubDate>Thu, 28 Nov 2024 00:00:00 GMT</pubDate>
+    <author>humpty/tony</author>
+    <category>threat hunting</category><category>reverse engineering</category><category>dotnet</category>
+    <description><![CDATA[Analyzing XWorm and tracking related infrastructure with hunt.io]]></description>
+  </item>
+
+  <item>
+    <title>Automating Qakbot Malware Analysis with Binary Ninja</title>
+    <link>https://invokere.com/posts/2024/02/automating-qakbot-malware-analysis-with-binary-ninja/</link>
+    <guid isPermaLink="true">https://invokere.com/posts/2024/02/automating-qakbot-malware-analysis-with-binary-ninja/</guid>
+    <pubDate>Wed, 21 Feb 2024 00:00:00 GMT</pubDate>
+    <author>invokere</author>
+    <category>reverse engineering</category><category>C</category><category>qakbot</category>
+    <description><![CDATA[A deep dive into Supper (Interlock RAT) a fileless Windows backdoor linked to Vice Society clarifying public report errors and detailing its C2 protocol, encryption, self-deletion, and reverse shell behavior.]]></description>
+  </item>
+  </channel>
+</rss>

@@ -2,8 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -25,7 +24,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build
+      # build (runs contentlayer + postbuild RSS) AND export to ./out
+      - run: npm run static
+        env:
+          NEXT_PUBLIC_SITE_URL: https://irchaos.club   # change if a project site
       - run: touch ./out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

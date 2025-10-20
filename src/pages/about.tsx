@@ -1,7 +1,8 @@
 // src/pages/about.tsx
 import Head from "next/head";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, BookOpen } from "lucide-react";
+import { SiDiscord } from "react-icons/si";
 import { PEOPLE } from "@/components/people/people";
 import { PersonCard } from "@/components/people/PersonCard";
 
@@ -43,7 +44,7 @@ export default function About() {
                     </p>
                 </section>
 
-                {/* Discord CTA (moved ABOVE Who we are) */}
+                {/* Discord CTA */}
                 <section className="mt-10 md:mt-12 relative rounded-lg border border-border overflow-hidden">
                     <div
                         className="absolute inset-0 pointer-events-none"
@@ -55,7 +56,7 @@ export default function About() {
                     <div className="relative p-4 md:p-5">
                         <div className="flex items-center gap-2">
                             <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#5865F2] text-white shadow">
-                                <span className="font-mono text-sm">D</span>
+                                  <SiDiscord className="h-5 w-5" aria-hidden="true" />
                             </div>
                             <h2 className="text-lg md:text-xl font-semibold">Join us on Discord</h2>
                         </div>
@@ -67,18 +68,41 @@ export default function About() {
                                 className="inline-flex items-center gap-1 rounded-full bg-[#5865F2] px-3.5 py-2.5 text-sm md:text-base font-medium text-white shadow hover:brightness-110"
                                 href="https://discord.gg/hGPsPGMa"
                                 target="_blank"
-                                rel="noopener"
+                                rel="noopener noreferrer"
                             >
                                 Join our Discord <ExternalLink className="h-4 w-4" />
                             </a>
-                            <a
-                                className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-3 py-2 text-xs md:text-sm font-medium hover:bg-muted/50"
-                                href="https://github.com/irchaosclub/irchaosclub.github.io/wiki/How-to-publish"
-                                target="_blank"
-                                rel="noopener"
-                            >
-                                How to get published on irchaos.club
-                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Separate card: How to get published */}
+                <section className="mt-6">
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="rounded-lg border border-border">
+                            <div className="p-4 md:p-5">
+                                <div className="flex items-center gap-2">
+                                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border">
+                                        <BookOpen className="h-5 w-5" aria-hidden="true" />
+                                    </div>
+                                    <h3 className="text-base md:text-lg font-semibold">
+                                        Get published on irchaos.club
+                                    </h3>
+                                </div>
+                                <p className="mt-2 text-sm md:text-base text-muted-foreground">
+                                    Share your DFIR write-ups, incident notes, and research with the community.
+                                </p>
+                                <div className="mt-3">
+                                    <a
+                                        className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-3 py-2 text-xs md:text-sm font-medium hover:bg-muted/50"
+                                        href="https://github.com/irchaosclub/irchaosclub.github.io/wiki/How-to-publish"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Submission guide <ExternalLink className="h-4 w-4" />
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

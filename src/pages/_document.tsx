@@ -4,7 +4,15 @@ import { Html, Head, Main, NextScript } from "next/document";
 export default function Document() {
     return (
         <Html lang="en">
-            <Head />
+            <Head>
+                <link rel="alternate" type="application/rss+xml" title="Incident Response Chaos Club" href="/rss.xml" />
+                <script
+                    async
+                    defer
+                    src="https://cloud.umami.is/script.js"
+                    data-website-id="78db5465-4eb6-4f3d-a40f-e952e8822134"
+                ></script>
+            </Head>
             <body>
                 <Main />
                 <NextScript />

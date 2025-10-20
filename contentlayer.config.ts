@@ -1,29 +1,27 @@
 // contentlayer.config.ts
 import { defineDocumentType, makeSource } from 'contentlayer/source-files'
+import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
+import rehypeSlug from "rehype-slug";
+
 
 export const Post = defineDocumentType(() => ({
     name: 'Post',
-    // supports both content/foo/index.md and content/bar.md
     filePathPattern: '**/*.md',
     contentType: 'markdown',
     fields: {
         title: { type: 'string', required: true },
-        date: { type: 'date', description: 'Publish date', required: true },
-
-        // optional front-matter you already use:
-        authors: { type: 'list', of: { type: 'string' }, required: false },
-        tags: { type: 'list', of: { type: 'string' }, required: false },
-        description: { type: 'string', required: false },
-        readingTime: { type: 'number', required: false },
-        external: { type: 'string', required: false },
+        date: { type: 'date', required: true },
+        authors: { type: 'list', of: { type: 'string' } },
+        tags: { type: 'list', of: { type: 'string' } },
+        description: { type: 'string' },
+        readingTime: { type: 'number' },
+        external: { type: 'string' },
     },
     computedFields: {
         slug: {
             type: 'string',
-            // normalized and no trailing /index (Windows-safe)
-            resolve: (doc) =>
-                doc._raw.flattenedPath.replace(/\\/g, '/').replace(/\/index$/i, ''),
+            resolve: (doc) => doc._raw.flattenedPath.replace(/\\/g, '/').replace(/\/index$/i, ''),
         },
     },
 }))
@@ -31,6 +29,9 @@ export const Post = defineDocumentType(() => ({
 export default makeSource({
     contentDirPath: 'content',
     documentTypes: [Post],
-    // cast avoids Windows/vfile type collisions
-    markdown: { rehypePlugins: [rehypeHighlight as unknown as any] },
+    markdown: {
+        // Enable GFM features: tables, strikethrough, task lists, autolinks
+        remarkPlugins: [remarkGfm as unknown as any],
+        rehypePlugins: [rehypeHighlight as unknown as any, rehypeSlug as any],
+    },
 })

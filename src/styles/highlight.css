@@ -90,3 +90,30 @@
 .hljs-tag {
     font-weight: bold;
 }
+
+/* --- Harmonize Tailwind Typography with rehype-highlight --- */
+
+/* Remove the outer box to avoid a double background */
+.prose pre {
+    background: transparent;
+    padding: 0;
+    border: none;
+}
+
+/* Add padding + radius to the actual highlighted block */
+.prose pre code.hljs {
+    display: block;
+    padding: 1rem 1.25rem;
+    /* keeps text off the sides */
+    border-radius: 0.5rem;
+    /* matches your .hljs radius */
+}
+
+/* Tweak inline code (not inside a pre) for readability */
+.prose :not(pre)>code {
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+}
