@@ -15,6 +15,26 @@ export default function Document() {
                 ></script>
             </Head>
             <body>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                        (function() {
+                            try {
+                                const savedTheme = localStorage.getItem('ircc-theme');
+                                if (savedTheme) {
+                                    document.documentElement.classList.add('theme-' + savedTheme);
+                                } else {
+                                    // Default to gruvbox-dark if no theme is saved
+                                    document.documentElement.classList.add('theme-gruvbox-dark');
+                                }
+                            } catch (e) {
+                                // Fallback if localStorage is not available
+                                document.documentElement.classList.add('theme-gruvbox-dark');
+                            }
+                        })();
+                        `
+                    }}
+                />
                 <Main />
                 <NextScript />
             </body>

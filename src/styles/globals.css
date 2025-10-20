@@ -10,7 +10,7 @@
     }
     
     /* Center title and date on mobile */
-    .mobile-article.prose.prose-invert h1 {
+    .mobile-article.prose-theme h1 {
         text-align: center !important;
     }
     
@@ -101,6 +101,8 @@
         box-sizing: border-box;
     }
 
+    /* No transitions for theme changes - instant switching */
+
     html {
         height: 100vh;
         height: 100dvh;
@@ -121,6 +123,14 @@
         background-repeat: repeat, repeat;
         background-attachment: fixed;
     }
+
+    /* Light theme body adjustments */
+    .theme-light body,
+    .theme-gruvbox-light body {
+        background-image:
+            radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+            linear-gradient(transparent 0, rgba(0, 0, 0, 0.025) 1px);
+    }
 }
 
 /* ---------- SIEM panels & helpers ---------- */
@@ -136,6 +146,15 @@
         background: var(--card);
     }
 
+    /* Light theme panel shadows */
+    .theme-light .panel,
+    .theme-gruvbox-light .panel {
+        box-shadow:
+            inset 0 1px 0 rgba(0, 0, 0, 0.04),
+            0 0 0 1px rgba(0, 0, 0, 0.08),
+            0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
     .panel::before {
         content: "";
         position: absolute;
@@ -145,8 +164,15 @@
         background: linear-gradient(135deg, rgba(142, 192, 124, 0.36), rgba(142, 192, 124, 0.06));
         -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
         -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
         mask-composite: exclude;
         pointer-events: none;
+    }
+
+    /* Light theme panel gradient border */
+    .theme-light .panel::before,
+    .theme-gruvbox-light .panel::before {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.02));
     }
 
     .panel-header {
@@ -163,12 +189,24 @@
         background: linear-gradient(90deg, transparent, rgba(142, 192, 124, 0.7), transparent);
     }
 
+    /* Light theme panel header line */
+    .theme-light .panel-header::after,
+    .theme-gruvbox-light .panel-header::after {
+        background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+    }
+
     .mono-accent {
         @apply font-mono tracking-tight;
     }
 
     .zebra tbody tr:nth-child(odd) {
         background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Light theme zebra stripes */
+    .theme-light .zebra tbody tr:nth-child(odd),
+    .theme-gruvbox-light .zebra tbody tr:nth-child(odd) {
+        background-color: rgba(0, 0, 0, 0.03);
     }
 
     .input-neo:focus-visible {
@@ -199,10 +237,11 @@
 
     /* darker info box specifically for selected-post description */
     .infobox {
-        background-color: var(--g-bg0_h);
+        background-color: var(--muted);
         /* clearly darker than panel */
-        border: 1px solid var(--g-bg2);
+        border: 1px solid var(--border);
         border-radius: 8px;
+        color: var(--muted-foreground);
     }
 
     .capsule {
@@ -323,6 +362,84 @@
     /* Add spacing after the last table row */
     .posts-table tbody tr:last-child td {
         padding-bottom: 24px;
+    }
+
+    /* Hide the panel header decoration line for posts panel */
+    .panel:has(.posts-container) .panel-header::after {
+        display: none;
+    }
+
+    /* Override CardContent padding removal for posts panel to add negative margin */
+    .panel:has(.posts-container) > :last-child {
+        margin: -6px -6px -6px -6px !important;
+        padding: 6px !important;
+        /* Don't add border-radius here - let panel handle it */
+        overflow: hidden;
+    }
+
+    /* Posts container - don't interfere with panel border */
+    .panel .posts-container {
+        background: transparent;
+        margin: 0;
+        overflow: hidden;
+        border-radius: calc(var(--radius) - 1px);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Make sure scroll container also respects border radius */
+    .posts-container .posts-scrollbar {
+        border-radius: calc(var(--radius) - 1px);
+        overflow: hidden;
+    }
+
+    /* Posts table styling */  
+    .posts-container .posts-table {
+        border: none;
+        border-radius: calc(var(--radius) - 1px);
+        background: var(--card);
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+    }
+    
+    /* Ensure header has proper background and text color */
+    .posts-container .posts-table thead tr {
+        background: var(--card) !important;
+    }
+    
+    .posts-container .posts-table thead th {
+        color: var(--muted-foreground) !important;
+        background: var(--card) !important;
+        border-color: var(--border) !important;
+    }
+    
+    /* Override any inherited dark styling for table headers */
+    .posts-table thead {
+        background: var(--card) !important;
+    }
+
+    /* Ensure table corners match panel radius */
+    .posts-container .posts-table tbody tr:last-child td:first-child {
+        border-bottom-left-radius: calc(var(--radius) - 1px);
+    }
+
+    .posts-container .posts-table tbody tr:last-child td:last-child {
+        border-bottom-right-radius: calc(var(--radius) - 1px);
+    }
+
+    /* Remove borders on last row to prevent extending beyond rounded corners */
+    .posts-container .posts-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .posts-container .posts-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Ensure zebra stripes respect border radius on last row */
+    .posts-container .zebra tbody tr:last-child {
+        background: transparent;
     }
 }
 
@@ -535,13 +652,13 @@
         }
 
         /* Override all prose children with highest specificity (except code blocks) */
-        .mobile-article.prose.prose-invert *:not(pre):not(pre *) {
+        .mobile-article.prose-theme *:not(pre):not(pre *) {
             max-width: calc(100vw - 1rem) !important;
             box-sizing: border-box !important;
         }
 
         /* Images - force small size on mobile */
-        .mobile-article.prose.prose-invert img {
+        .mobile-article.prose-theme img {
             max-width: calc(100vw - 1rem) !important;
             width: 100% !important;
             height: auto !important;
@@ -550,7 +667,7 @@
         }
 
         /* Code blocks - proper scrolling solution */
-        .mobile-article.prose.prose-invert pre {
+        .mobile-article.prose-theme pre {
             overflow-x: auto !important;
             margin: 0.5rem 0 !important;
             max-width: calc(100vw - 2rem) !important;
@@ -559,7 +676,7 @@
             border: none !important;
         }
         
-        .mobile-article.prose.prose-invert pre code.hljs {
+        .mobile-article.prose-theme pre code.hljs {
             font-size: 0.7rem !important;
             padding: 0.5rem !important;
             display: table !important;
@@ -570,22 +687,24 @@
         }
 
         /* Tables - force small and scrollable */
-        .mobile-article.prose.prose-invert table {
+        .mobile-article.prose-theme table {
             max-width: calc(100vw - 1rem) !important;
             font-size: 0.7rem !important;
             display: block !important;
             overflow-x: auto !important;
             white-space: nowrap !important;
             margin: 0.5rem 0 !important;
+            border-radius: 0.375rem !important;
+            overflow: hidden !important;
         }
 
         /* Headings */
-        .mobile-article.prose.prose-invert h1,
-        .mobile-article.prose.prose-invert h2,
-        .mobile-article.prose.prose-invert h3,
-        .mobile-article.prose.prose-invert h4,
-        .mobile-article.prose.prose-invert h5,
-        .mobile-article.prose.prose-invert h6 {
+        .mobile-article.prose-theme h1,
+        .mobile-article.prose-theme h2,
+        .mobile-article.prose-theme h3,
+        .mobile-article.prose-theme h4,
+        .mobile-article.prose-theme h5,
+        .mobile-article.prose-theme h6 {
             font-size: clamp(1rem, 4vw, 1.5rem) !important;
             line-height: 1.3 !important;
             margin: 0.75rem 0 0.5rem 0 !important;
@@ -593,10 +712,10 @@
         }
 
         /* Paragraphs and lists */
-        .mobile-article.prose.prose-invert p,
-        .mobile-article.prose.prose-invert ul,
-        .mobile-article.prose.prose-invert ol,
-        .mobile-article.prose.prose-invert li {
+        .mobile-article.prose-theme p,
+        .mobile-article.prose-theme ul,
+        .mobile-article.prose-theme ol,
+        .mobile-article.prose-theme li {
             font-size: 0.9rem !important;
             line-height: 1.5 !important;
             margin: 0.5rem 0 !important;
@@ -604,17 +723,396 @@
         }
 
         /* Links and inline code */
-        .mobile-article.prose.prose-invert a,
-        .mobile-article.prose.prose-invert code:not(pre code) {
+        .mobile-article.prose-theme a,
+        .mobile-article.prose-theme code:not(pre code) {
             word-break: break-all !important;
             overflow-wrap: break-word !important;
         }
 
         /* Blockquotes */
-        .mobile-article.prose.prose-invert blockquote {
+        .mobile-article.prose-theme blockquote {
             margin: 0.5rem 0 !important;
             padding: 0.5rem 1rem !important;
             font-size: 0.85rem !important;
         }
     }
+}
+
+/* ========== THEME-AWARE PROSE STYLES ========== */
+
+/* Base prose styling - will be overridden by theme-specific rules */
+.prose-theme {
+    /* Use Tailwind prose classes directly in CSS */
+    color: var(--foreground);
+    max-width: 65ch;
+    line-height: 1.7;
+}
+
+/* Dark themes use inverted prose colors */
+:root .prose-theme,
+.theme-gruvbox-dark .prose-theme,
+.theme-solarized-dark .prose-theme,
+.theme-uwu .prose-theme,
+.theme-oxocarbon .prose-theme {
+    --prose-body: var(--foreground);
+    --prose-headings: var(--foreground);
+    --prose-lead: var(--muted-foreground);
+    --prose-links: var(--primary);
+    --prose-bold: var(--foreground);
+    --prose-counters: var(--muted-foreground);
+    --prose-bullets: var(--muted-foreground);
+    --prose-hr: var(--border);
+    --prose-quotes: var(--foreground);
+    --prose-quote-borders: var(--border);
+    --prose-captions: var(--muted-foreground);
+    --prose-kbd: var(--foreground);
+    --prose-kbd-shadows: rgb(255 255 255 / 0.1);
+    --prose-code: var(--foreground);
+    --prose-pre-code: var(--muted-foreground);
+    --prose-pre-bg: var(--muted);
+    --prose-th-borders: var(--border);
+    --prose-td-borders: var(--border);
+}
+
+/* Light themes use regular prose colors */
+.theme-light .prose-theme,
+.theme-gruvbox-light .prose-theme {
+    --prose-body: var(--foreground);
+    --prose-headings: var(--foreground);
+    --prose-lead: var(--muted-foreground);
+    --prose-links: var(--primary);
+    --prose-bold: var(--foreground);
+    --prose-counters: var(--muted-foreground);
+    --prose-bullets: var(--muted-foreground);
+    --prose-hr: var(--border);
+    --prose-quotes: var(--foreground);
+    --prose-quote-borders: var(--border);
+    --prose-captions: var(--muted-foreground);
+    --prose-kbd: var(--foreground);
+    --prose-kbd-shadows: rgb(0 0 0 / 0.1);
+    --prose-code: var(--foreground);
+    --prose-pre-code: var(--muted-foreground);
+    --prose-pre-bg: var(--muted);
+    --prose-th-borders: var(--border);
+    --prose-td-borders: var(--border);
+}
+
+/* Apply prose styles using the custom properties */
+.prose-theme {
+    color: var(--prose-body);
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.prose-theme > * + * {
+    margin-top: 1.25em;
+}
+
+.prose-theme h1 {
+    color: var(--prose-headings);
+    font-weight: 800;
+    font-size: 2.25em;
+    margin-top: 0;
+    margin-bottom: 0.8888889em;
+    line-height: 1.1111111;
+}
+
+.prose-theme h2 {
+    color: var(--prose-headings);
+    font-weight: 700;
+    font-size: 1.5em;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    line-height: 1.3333333;
+}
+
+.prose-theme h3 {
+    color: var(--prose-headings);
+    font-weight: 600;
+    font-size: 1.25em;
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    line-height: 1.6;
+}
+
+.prose-theme h4,
+.prose-theme h5,
+.prose-theme h6 {
+    color: var(--prose-headings);
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    line-height: 1.5;
+}
+
+.prose-theme p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+}
+
+.prose-theme ul,
+.prose-theme ol {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    padding-left: 1.625em;
+}
+
+.prose-theme li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose-theme a {
+    color: var(--prose-links);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.prose-theme strong {
+    color: var(--prose-bold);
+    font-weight: 600;
+}
+
+.prose-theme code {
+    color: var(--prose-code);
+    background-color: var(--muted);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+.prose-theme pre {
+    background-color: var(--prose-pre-bg);
+    color: var(--prose-pre-code);
+    overflow-x: auto;
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+.prose-theme pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.prose-theme table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    border: 1px solid var(--prose-td-borders);
+}
+
+.prose-theme th,
+.prose-theme td {
+    border-right: 1px solid var(--prose-td-borders);
+    border-bottom: 1px solid var(--prose-td-borders);
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.prose-theme th:last-child,
+.prose-theme td:last-child {
+    border-right: none;
+}
+
+.prose-theme tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Ensure rounded corners on table */
+.prose-theme thead tr:first-child th:first-child {
+    border-top-left-radius: 0.375rem;
+}
+
+.prose-theme thead tr:first-child th:last-child {
+    border-top-right-radius: 0.375rem;
+}
+
+.prose-theme tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 0.375rem;
+}
+
+.prose-theme tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 0.375rem;
+}
+
+.prose-theme tr:last-child td {
+    border-bottom: none;
+}
+
+.prose-theme th {
+    background-color: var(--muted);
+    font-weight: 600;
+}
+
+.prose-theme blockquote {
+    border-left: 4px solid var(--prose-quote-borders);
+    padding-left: 1rem;
+    color: var(--prose-quotes);
+    font-style: italic;
+}
+
+/* ========== THEME DEFINITIONS ========== */
+
+/* Gruvbox Light Theme */
+.theme-gruvbox-light {
+    /* Gruvbox light palette */
+    --g-bg0_h: #f9f5d7; /* hard */
+    --g-bg0: #fbf1c7;
+    --g-bg0_s: #f2e5bc; /* soft */
+    --g-bg1: #ebdbb2;
+    --g-bg2: #d5c4a1;
+    --g-bg3: #bdae93;
+    --g-bg4: #a89984;
+
+    --g-fg0: #282828;
+    --g-fg1: #3c3836;
+    --g-fg2: #504945;
+    --g-fg3: #665c54;
+    --g-fg4: #7c6f64;
+
+    --g-red: #cc241d;
+    --g-red-br: #9d0006;
+    --g-green: #98971a;
+    --g-green-br: #79740e;
+    --g-yellow: #d79921;
+    --g-yellow-br: #b57614;
+    --g-blue: #458588;
+    --g-blue-br: #076678;
+    --g-purple: #b16286;
+    --g-purple-br: #8f3f71;
+    --g-aqua: #689d6a;
+    --g-aqua-br: #427b58;
+    --g-orange: #d65d0e;
+    --g-orange-br: #af3a03;
+
+    /* Theme mapping */
+    --background: var(--g-bg0_h);
+    --foreground: var(--g-fg1);
+    --card: var(--g-bg0);
+    --card-foreground: var(--g-fg1);
+    --popover: var(--g-bg0_s);
+    --popover-foreground: var(--g-fg1);
+    --primary: var(--g-aqua-br);
+    --primary-foreground: var(--g-bg0_h);
+    --secondary: var(--g-orange-br);
+    --secondary-foreground: var(--g-bg0_h);
+    --muted: var(--g-bg1);
+    --muted-foreground: var(--g-fg3);
+    --accent: var(--g-blue-br);
+    --accent-foreground: var(--g-bg0_h);
+    --destructive: var(--g-red-br);
+    --destructive-foreground: var(--g-bg0_h);
+    --border: var(--g-bg2);
+    --input: var(--g-bg2);
+    --ring: var(--g-aqua-br);
+}
+
+/* Solarized Dark Theme */
+.theme-solarized-dark {
+    --background: #002b36;
+    --foreground: #839496;
+    --card: #073642;
+    --card-foreground: #839496;
+    --popover: #073642;
+    --popover-foreground: #839496;
+    --primary: #268bd2;
+    --primary-foreground: #002b36;
+    --secondary: #cb4b16;
+    --secondary-foreground: #002b36;
+    --muted: #073642;
+    --muted-foreground: #586e75;
+    --accent: #2aa198;
+    --accent-foreground: #002b36;
+    --destructive: #dc322f;
+    --destructive-foreground: #002b36;
+    --border: #073642;
+    --input: #073642;
+    --ring: #268bd2;
+}
+
+/* UwU Theme (Very Pink) */
+.theme-uwu {
+    --background: #2d1b3d;
+    --foreground: #f8a2c2;
+    --card: #3d2548;
+    --card-foreground: #f8a2c2;
+    --popover: #3d2548;
+    --popover-foreground: #f8a2c2;
+    --primary: #ff69b4;
+    --primary-foreground: #2d1b3d;
+    --secondary: #da70d6;
+    --secondary-foreground: #2d1b3d;
+    --muted: #4a2c5a;
+    --muted-foreground: #d8a7ca;
+    --accent: #ff1493;
+    --accent-foreground: #2d1b3d;
+    --destructive: #ff6b9d;
+    --destructive-foreground: #2d1b3d;
+    --border: #4a2c5a;
+    --input: #4a2c5a;
+    --ring: #ff69b4;
+}
+
+/* Light Mode Theme */
+.theme-light {
+    --background: #ffffff;
+    --foreground: #1a1a1a;
+    --card: #f8f9fa;
+    --card-foreground: #1a1a1a;
+    --popover: #ffffff;
+    --popover-foreground: #1a1a1a;
+    --primary: #0070f3;
+    --primary-foreground: #ffffff;
+    --secondary: #666666;
+    --secondary-foreground: #ffffff;
+    --muted: #f1f3f4;
+    --muted-foreground: #6b7280;
+    --accent: #0070f3;
+    --accent-foreground: #ffffff;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --border: #e5e7eb;
+    --input: #e5e7eb;
+    --ring: #0070f3;
+}
+
+/* Oxocarbon Theme */
+.theme-oxocarbon {
+    --background: #161616;
+    --foreground: #f4f4f4;
+    --card: #262626;
+    --card-foreground: #f4f4f4;
+    --popover: #262626;
+    --popover-foreground: #f4f4f4;
+    --primary: #33b1ff;
+    --primary-foreground: #161616;
+    --secondary: #ff7eb6;
+    --secondary-foreground: #161616;
+    --muted: #393939;
+    --muted-foreground: #c6c6c6;
+    --accent: #42be65;
+    --accent-foreground: #161616;
+    --destructive: #fa4d56;
+    --destructive-foreground: #161616;
+    --border: #393939;
+    --input: #393939;
+    --ring: #33b1ff;
+}
+
+/* Internal Post Styling */
+.internal-post {
+    border-left: 2px solid hsl(var(--primary) / 0.3);
+}
+
+.internal-post-mobile {
+    background: linear-gradient(135deg, 
+        hsl(var(--primary) / 0.05) 0%, 
+        hsl(var(--card)) 20%
+    ) !important;
+    border-left: 3px solid hsl(var(--primary) / 0.4);
 }

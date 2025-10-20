@@ -27,7 +27,7 @@ export default function About() {
                 </header>
 
                 {/* Body copy */}
-                <section className="prose prose-invert max-w-none prose-headings:scroll-mt-24">
+                <section className="prose-theme max-w-none prose-headings:scroll-mt-24">
                     <p>
                         At the <strong>Incident Response Chaos Club (IRCC)</strong>, we embrace the chaos of cybersecurity.
                         We’re a collective of curious minds united by a passion for digital forensics, incident response,

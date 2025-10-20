@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Rss } from "lucide-react";
+import ThemePicker from "../theme/ThemePicker";
 
 export default function Header() {
     return (
@@ -34,11 +35,16 @@ export default function Header() {
                         >
                             Discord
                         </a>
+                        
+                        {/* Theme picker - now visible on mobile */}
+                        <ThemePicker />
+                        
+                        {/* RSS button - desktop only */}
                         <Link
                             href="/rss.xml"
                             aria-label="RSS feed"
                             title="RSS feed"
-                            className="inline-flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-md border hover:bg-muted transition-colors"
+                            className="hidden md:inline-flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-md border hover:bg-muted transition-colors"
                         >
                             <Rss className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
                             <span className="sr-only">RSS</span>

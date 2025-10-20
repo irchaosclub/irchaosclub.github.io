@@ -11,7 +11,7 @@ import { Panel } from "@/components/shell/Panel";
 import { Button } from "@/components/ui/button";
 import { PostAreaInteractive, Bin } from "@/components/charts/PostAreaInteractive";
 import { parseQuery, matchesQuery } from "@/lib/search";
-import { ExternalLink, Search } from "lucide-react";
+import { ExternalLink, Search, House, Globe, Link2, ArrowUpRight } from "lucide-react";
 import { InfoBox } from "@/components/ui/infobox";
 import { MobilePostSheet } from "@/components/mobile/MobilePostSheet";
 import { CliSearch } from "@/components/search/CliSearch";
@@ -45,13 +45,14 @@ function TitleCell({
     return (
         <TableCell className={`max-w-[80ch] min-w-0 whitespace-normal break-words ${wrapped ? "py-3" : ""}`}>
             {external ? (
-                <a href={external} className="hover:text-primary underline inline-flex items-center gap-1 min-w-0">
+                <a href={external} className="hover:text-primary underline inline-flex items-center gap-1 min-w-0 font-medium">
+                    <Globe className="h-4 w-4 flex-none shrink-0 text-muted-foreground" />
                     <span ref={spanRef} className="break-words whitespace-normal">{title}</span>
-                    <ExternalLink className="h-4 w-4 flex-none shrink-0" />
                 </a>
             ) : (
-                <Link href={`/${slug}/`} className="hover:text-primary underline break-words whitespace-normal">
-                    <span ref={spanRef}>{title}</span>
+                <Link href={`/${slug}/`} className="hover:text-primary underline inline-flex items-center gap-1 min-w-0 font-medium">
+                    <House className="h-4 w-4 flex-none shrink-0 text-primary" />
+                    <span ref={spanRef} className="break-words whitespace-normal">{title}</span>
                 </Link>
             )}
         </TableCell>
@@ -81,18 +82,22 @@ function MobilePosts({
                 return (
                     <button
                         key={p.slug}
-                        className="w-full text-left rounded-md border border-border bg-card/60 p-3 hover:bg-muted-10 transition"
+                        className={`w-full text-left rounded-md border border-border p-3 hover:bg-muted-10 transition ${ext ? 'bg-card/60' : 'bg-card/80 internal-post-mobile'}`}
                         onClick={() => onCardClick(p)}
                     >
                         <div className="flex items-center justify-between gap-2">
                             <time className="text-xs text-muted-foreground" dateTime={p.date}>
                                 {new Date(p.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}
                             </time>
-                            {ext ? <ExternalLink className="h-4 w-4 shrink-0" /> : null}
                         </div>
 
-                        <div className="mt-1 font-medium underline break-words whitespace-normal">
-                            {p.title}
+                        <div className="mt-1 font-medium underline break-words whitespace-normal flex items-center gap-1">
+                            {ext ? (
+                                <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            ) : (
+                                <House className="h-4 w-4 shrink-0 text-primary" />
+                            )}
+                            <span>{p.title}</span>
                         </div>
 
                         {authors.length > 0 && (
@@ -161,7 +166,7 @@ export default function Home({ posts }: Props) {
     const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
     const [showHistogram, setShowHistogram] = useState(true);
     const [showFooter, setShowFooter] = useState(true);
-    const [accordionOpenSections, setAccordionOpenSections] = useState(["time", "authors", "tags"]);
+    const [accordionOpenSections, setAccordionOpenSections] = useState(["time", "authors", "type", "tags"]);
     
 
     useEffect(() => {
@@ -486,12 +491,19 @@ export default function Home({ posts }: Props) {
                             <AccordionContent>
                                 <ul className="space-y-1">
                                     {Object.entries(typeCounts)
-                                        .sort((a, b) => b[1] - a[1])
+                                        .sort((a, b) => a[0] === 'internal' ? -1 : b[0] === 'internal' ? 1 : b[1] - a[1])
                                         .map(([type, count]) => (
                                             <li key={type} className="flex items-center justify-between gap-2">
                                                 <label className="flex items-center gap-2">
                                                     <Checkbox checked={typeFacet.has(type)} onCheckedChange={() => toggleFacet(setTypeFacet, type)} />
-                                                    <span className="text-sm capitalize">{type}</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        {type === 'internal' ? (
+                                                            <House className="h-3.5 w-3.5 text-primary" />
+                                                        ) : (
+                                                            <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                                                        )}
+                                                        <span className={`text-sm capitalize ${type === 'internal' ? 'font-medium' : ''}`}>{type}</span>
+                                                    </div>
                                                 </label>
                                                 <span className="text-xs text-muted-foreground">{count}</span>
                                             </li>
@@ -608,7 +620,7 @@ export default function Home({ posts }: Props) {
                                                 return (
                                                     <TableRow
                                                         key={p.slug}
-                                                        className={`${isSel ? "bg-muted-40" : ""} cursor-pointer`}
+                                                        className={`${isSel ? "bg-muted-40" : ""} ${!ext ? "internal-post" : ""} cursor-pointer`}
                                                         onClick={() => setSelected(p.slug)}
                                                         onDoubleClick={() => (window.location.href = ext ? ext : `/${p.slug}/`)}
                                                     >
