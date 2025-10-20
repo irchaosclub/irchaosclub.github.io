@@ -320,26 +320,32 @@
     /* Custom scrollbar styling for posts list */
     .posts-scrollbar {
         scrollbar-width: thin;
-        scrollbar-color: var(--g-bg3) var(--g-bg1);
+        scrollbar-color: var(--muted-foreground) var(--muted);
+        overflow-y: scroll !important; /* Force scrollbar visibility */
     }
     
     .posts-scrollbar::-webkit-scrollbar {
         width: 8px;
+        background: var(--muted);
     }
     
     .posts-scrollbar::-webkit-scrollbar-track {
-        background: var(--g-bg1);
+        background: var(--muted);
         border-radius: 4px;
     }
     
     .posts-scrollbar::-webkit-scrollbar-thumb {
-        background: var(--g-bg3);
+        background: var(--muted-foreground);
         border-radius: 4px;
-        border: 1px solid var(--g-bg2);
+        border: 1px solid var(--border);
     }
     
     .posts-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: var(--g-bg4);
+        background: var(--foreground);
+    }
+    
+    .posts-scrollbar::-webkit-scrollbar-corner {
+        background: var(--muted);
     }
     
     /* Posts container with fade effect */
