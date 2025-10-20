@@ -217,6 +217,7 @@ Where each version corresponds to this table:
 | 0xD       | Windows 10 (build > 17762)          | `dwBuildNumber > 17762`                                                              |
 | 0xE       | Windows 11 (build > 20347)          | `dwBuildNumber > 20347`                                                              |
 | 0xF       | Windows 10 fallback (build < 22000) | `dwMajorVersion == 10 && dwMinorVersion == 0 && dwBuildNumber < 0x55f0`              |
+
 It then proceeds with it's current integrity level (the decompilation here is a but wonky, not sure why but the you get the idea) with the default value of "UNTRUSTED":
 ![The routine used to gather information on the current integrity level of the running sample through multiple Windows APIs](/images/supper-is-served/integrity-level-mapping.png)
 Where each integrity level corresponds to this mapping:
@@ -228,6 +229,7 @@ Where each integrity level corresponds to this mapping:
 | MEDIUM (0x2)    | 0x2000               |
 | HIGH (0x3)      | 0x3000               |
 | SYSTEM (0x4)    | 0x4000               |
+
 It then fetches two important pieces of information:
 - The network hostname of the victim with a default/fallback value of `WORKGROUP`
 - The local hostname of the victim with a default/fallback value of `SIRIUSWIN11MRE`
