@@ -534,8 +534,8 @@
             margin: 0;
         }
 
-        /* Override all prose children with highest specificity */
-        .mobile-article.prose.prose-invert * {
+        /* Override all prose children with highest specificity (except code blocks) */
+        .mobile-article.prose.prose-invert *:not(pre):not(pre *) {
             max-width: calc(100vw - 1rem) !important;
             box-sizing: border-box !important;
         }
@@ -549,21 +549,24 @@
             display: block !important;
         }
 
-        /* Code blocks - work with existing highlight.css structure */
+        /* Code blocks - proper scrolling solution */
         .mobile-article.prose.prose-invert pre {
-            max-width: calc(100vw - 2rem) !important;
             overflow-x: auto !important;
             margin: 0.5rem 0 !important;
-            /* Keep existing transparent background from highlight.css */
+            max-width: calc(100vw - 2rem) !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
         }
         
         .mobile-article.prose.prose-invert pre code.hljs {
             font-size: 0.7rem !important;
             padding: 0.5rem !important;
-            /* Override the fixed padding from highlight.css on mobile */
-            width: max-content !important;
+            display: table !important;
+            width: auto !important;
             min-width: 100% !important;
-            /* This ensures background extends with content */
+            table-layout: fixed !important;
+            white-space: pre !important;
         }
 
         /* Tables - force small and scrollable */
