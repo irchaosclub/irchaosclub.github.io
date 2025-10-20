@@ -2,7 +2,8 @@
 import { defineDocumentType, makeSource } from 'contentlayer/source-files'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
-import rehypeSlug from "rehype-slug";
+import rehypeSlug from "rehype-slug"
+import rehypeRaw from 'rehype-raw'
 
 
 export const Post = defineDocumentType(() => ({
@@ -17,11 +18,12 @@ export const Post = defineDocumentType(() => ({
         description: { type: 'string' },
         readingTime: { type: 'number' },
         external: { type: 'string' },
+        spotifyTrack: { type: 'string' },
     },
     computedFields: {
         slug: {
             type: 'string',
-            resolve: (doc) => doc._raw.flattenedPath.replace(/\\/g, '/').replace(/\/index$/i, ''),
+            resolve: (doc: any) => doc._raw.flattenedPath.replace(/\\/g, '/').replace(/\/index$/i, ''),
         },
     },
 }))
@@ -30,8 +32,7 @@ export default makeSource({
     contentDirPath: 'content',
     documentTypes: [Post],
     markdown: {
-        // Enable GFM features: tables, strikethrough, task lists, autolinks
-        remarkPlugins: [remarkGfm as unknown as any],
-        rehypePlugins: [rehypeHighlight as unknown as any, rehypeSlug as any],
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeRaw, rehypeSlug, rehypeHighlight],
     },
 })
