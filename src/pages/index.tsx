@@ -316,7 +316,11 @@ export default function Home({ posts }: Props) {
 
     // facet counts
     const authorCounts = useMemo(
-        () => countValues(filteredByQuery.flatMap((p) => ((p as any).authors ?? []) as string[])),
+        () => countValues(
+            filteredByQuery
+                .filter((p) => !(p as any).corporate)  // Exclude corporate posts from author facet
+                .flatMap((p) => ((p as any).authors ?? []) as string[])
+        ),
         [filteredByQuery]
     );
     const tagCounts = useMemo(

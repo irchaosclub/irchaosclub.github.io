@@ -19,6 +19,7 @@ export const Post = defineDocumentType(() => ({
         readingTime: { type: 'number' },
         external: { type: 'string' },
         spotifyTrack: { type: 'string' },
+        corporate: { type: 'boolean' },
     },
     computedFields: {
         slug: {
