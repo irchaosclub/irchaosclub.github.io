@@ -85,7 +85,7 @@ ${itemsXml}
 </rss>
 `;
 
-const outDir = path.join(process.cwd(), "public");
-await fs.mkdir(outDir, { recursive: true });
-await fs.writeFile(path.join(outDir, "rss.xml"), xml, "utf8");
+const dest = path.join(process.cwd(), "public", "rss.xml");
+await fs.mkdir(path.dirname(dest), { recursive: true });
+await fs.writeFile(dest, xml, "utf8");
 console.log(`[generate-rss] ✔ Wrote public/rss.xml with ${posts.length} item(s).`);

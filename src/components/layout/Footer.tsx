@@ -7,7 +7,7 @@ export default function Footer() {
         <footer className="border-t mt-16">
             <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6 py-8 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                    © {new Date().getFullYear()} Your Site
+                    © {new Date().getFullYear()} irchaos.club
                 </p>
 
                 <nav className="flex items-center gap-2">
