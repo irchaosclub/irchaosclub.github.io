@@ -15,10 +15,19 @@ export type Bin = { key: string; label: string; start: Date; end: Date; count: n
 
 export function PostAreaInteractive({ bins }: { bins: Bin[] }) {
     const data = React.useMemo(() => bins.map((b) => ({ ...b })), [bins]);
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return <div className="w-full h-[180px] bg-muted/20 animate-pulse rounded" />;
+    }
 
     return (
-        <ChartContainer className="w-full h-[180px]" config={{ accent: "var(--primary)" }}>
-            <ResponsiveContainer width="100%" height="100%">
+        <ChartContainer className="w-full h-[180px] min-h-[180px]" config={{ accent: "var(--primary)" }}>
+            <ResponsiveContainer width="100%" height={180} minHeight={180}>
                 <AreaChart data={data} margin={{ top: 6, right: 8, left: 8, bottom: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="3 6" vertical={false} />
                     <XAxis

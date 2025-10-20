@@ -24,7 +24,10 @@ export function CliSearch({
 
     // width of 1 mono character (used to position the underscore)
     const [charWidth, setCharWidth] = React.useState<number>(8);
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
+        // Only run on client-side to avoid SSR mismatch
+        if (typeof window === 'undefined') return;
+        
         const el = charRef.current;
         if (!el) return;
         const measure = () => setCharWidth(el.getBoundingClientRect().width || 8);
