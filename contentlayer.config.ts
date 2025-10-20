@@ -33,6 +33,6 @@ export default makeSource({
     documentTypes: [Post],
     markdown: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeRaw, rehypeSlug, rehypeHighlight],
+        rehypePlugins: [rehypeRaw, rehypeSlug, rehypeHighlight as any],
     },
 })
