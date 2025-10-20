@@ -153,6 +153,7 @@ export default function Home({ posts }: Props) {
         setRange(null);
         setAuthorFacet(new Set());
         setTagFacet(new Set());
+        setTypeFacet(new Set());
         setDaysFacet(null);
     }
 
@@ -181,10 +182,10 @@ export default function Home({ posts }: Props) {
             // Progressive accordion collapse based on height
             if (viewportHeight >= 800) {
                 // Full height: show all sections
-                setAccordionOpenSections(["time", "authors", "tags"]);
+                setAccordionOpenSections(["time", "authors", "type", "tags"]);
             } else if (viewportHeight >= 650) {
                 // Medium height: collapse tags (least important)
-                setAccordionOpenSections(["time", "authors"]);
+                setAccordionOpenSections(["time", "authors", "type"]);
             } else {
                 // Small height: only keep time (most important)
                 setAccordionOpenSections(["time"]);
@@ -256,6 +257,7 @@ export default function Home({ posts }: Props) {
     const [selected, setSelected] = useState<string | null>(posts[0]?.slug ?? null);
     const [authorFacet, setAuthorFacet] = useState<Set<string>>(new Set());
     const [tagFacet, setTagFacet] = useState<Set<string>>(new Set());
+    const [typeFacet, setTypeFacet] = useState<Set<string>>(new Set());
     const [daysFacet, setDaysFacet] = useState<number | null>(null);
 
 
@@ -285,7 +287,7 @@ export default function Home({ posts }: Props) {
     );
 
     // Build histogram from data that ignores TIME (range & daysFacet).
-    // It still respects query + author/tag facets.
+    // It still respects query + author/tag/type facets.
     const histogramSource = useMemo(() => {
         return filteredByQuery.filter((p) => {
             if (authorFacet.size) {
@@ -298,9 +300,13 @@ export default function Home({ posts }: Props) {
                 let ok = false; for (const t of tagFacet) if (pt.has(t)) { ok = true; break; }
                 if (!ok) return false;
             }
+            if (typeFacet.size) {
+                const postType = (p as any).external ? 'external' : 'internal';
+                if (!typeFacet.has(postType)) return false;
+            }
             return true;
         });
-    }, [filteredByQuery, authorFacet, tagFacet]);
+    }, [filteredByQuery, authorFacet, tagFacet, typeFacet]);
 
 
     // facet counts
@@ -312,6 +318,14 @@ export default function Home({ posts }: Props) {
         () => countValues(filteredByQuery.flatMap((p) => ((p as any).tags ?? []) as string[])),
         [filteredByQuery]
     );
+    const typeCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        for (const p of filteredByQuery) {
+            const type = (p as any).external ? 'external' : 'internal';
+            counts[type] = (counts[type] ?? 0) + 1;
+        }
+        return counts;
+    }, [filteredByQuery]);
 
     // quick time facet
     const quickRange = useMemo(() => {
@@ -347,9 +361,13 @@ export default function Home({ posts }: Props) {
                 }
                 if (!ok) return false;
             }
+            if (typeFacet.size) {
+                const postType = (p as any).external ? 'external' : 'internal';
+                if (!typeFacet.has(postType)) return false;
+            }
             return true;
         });
-    }, [filteredByQuery, range, quickRange, authorFacet, tagFacet]);
+    }, [filteredByQuery, range, quickRange, authorFacet, tagFacet, typeFacet]);
 
 
     // current selection
@@ -391,6 +409,7 @@ export default function Home({ posts }: Props) {
     function resetFacets() {
         setAuthorFacet(new Set());
         setTagFacet(new Set());
+        setTypeFacet(new Set());
         setDaysFacet(null);
         setRange(null);
     }
@@ -459,6 +478,25 @@ export default function Home({ posts }: Props) {
                                             ))}
                                     </ul>
                                 </ScrollArea>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        <AccordionItem value="type">
+                            <AccordionTrigger>Type</AccordionTrigger>
+                            <AccordionContent>
+                                <ul className="space-y-1">
+                                    {Object.entries(typeCounts)
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([type, count]) => (
+                                            <li key={type} className="flex items-center justify-between gap-2">
+                                                <label className="flex items-center gap-2">
+                                                    <Checkbox checked={typeFacet.has(type)} onCheckedChange={() => toggleFacet(setTypeFacet, type)} />
+                                                    <span className="text-sm capitalize">{type}</span>
+                                                </label>
+                                                <span className="text-xs text-muted-foreground">{count}</span>
+                                            </li>
+                                        ))}
+                                </ul>
                             </AccordionContent>
                         </AccordionItem>
 
@@ -643,50 +681,67 @@ export default function Home({ posts }: Props) {
                     {!selectedPost ? (
                         <p className="text-muted-foreground text-sm">Nothing selected.</p>
                     ) : (
-                        <div className="space-y-2">
-                            <h2 className="text-base font-semibold">{selectedPost.title}</h2>
-                            <p className="text-xs text-muted-foreground">
-                                <time dateTime={selectedPost.date}>
-                                    {new Date(selectedPost.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" })}
-                                </time>
-                            </p>
+                        <div className="space-y-3">
+                            <div>
+                                <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">Title:</h3>
+                                <h2 className="text-base font-semibold">{selectedPost.title}</h2>
+                            </div>
+
+                            <div>
+                                <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">Publication Date:</h3>
+                                <p className="text-xs text-muted-foreground">
+                                    <time dateTime={selectedPost.date}>
+                                        {new Date(selectedPost.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" })}
+                                    </time>
+                                </p>
+                            </div>
 
                             {(((selectedPost as any).authors ?? []) as string[]).length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                    {(((selectedPost as any).authors) as string[]).map((a) => (
-                                        <Pill
-                                            key={a}
-                                            variant={authorFacet.has(a) ? "solid" : "soft"}
-                                            onClick={() => toggleFacet(setAuthorFacet, a)}
-                                        >
-                                            {a}
-                                        </Pill>
-
-                                    ))}
+                                <div>
+                                    <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">Authors:</h3>
+                                    <div className="flex flex-wrap gap-1">
+                                        {(((selectedPost as any).authors) as string[]).map((a) => (
+                                            <Pill
+                                                key={a}
+                                                variant={authorFacet.has(a) ? "solid" : "soft"}
+                                                onClick={() => toggleFacet(setAuthorFacet, a)}
+                                            >
+                                                {a}
+                                            </Pill>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
-                                {(selectedPost as any).description && (
-                                    <InfoBox className="break-words">{(selectedPost as any).description}</InfoBox>
-                                )}
 
+                            {(selectedPost as any).description && (
+                                <div>
+                                    <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">Description:</h3>
+                                    <InfoBox className="break-words">{(selectedPost as any).description}</InfoBox>
+                                </div>
+                            )}
 
                             {(((selectedPost as any).tags ?? []) as string[]).length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                    {(((selectedPost as any).tags) as string[]).map((t) => (
-                                        <Pill
-                                            key={t}
-                                            variant={tagFacet.has(t) ? "solid" : "soft"}
-                                            onClick={() => toggleFacet(setTagFacet, t)}
-                                        >
-                                            {t}
-                                        </Pill>
-
-                                    ))}
+                                <div>
+                                    <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">Tags:</h3>
+                                    <div className="flex flex-wrap gap-1">
+                                        {(((selectedPost as any).tags) as string[]).map((t) => (
+                                            <Pill
+                                                key={t}
+                                                variant={tagFacet.has(t) ? "solid" : "soft"}
+                                                onClick={() => toggleFacet(setTagFacet, t)}
+                                            >
+                                                {t}
+                                            </Pill>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
                             {(selectedPost as any).readingTime && (
-                                <p className="text-xs text-muted-foreground">~{(selectedPost as any).readingTime} min read</p>
+                                <div>
+                                    <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">Reading Time:</h3>
+                                    <p className="text-xs text-muted-foreground">~{(selectedPost as any).readingTime} min read</p>
+                                </div>
                             )}
 
                             <div className="pt-1">
