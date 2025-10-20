@@ -47,9 +47,9 @@ export default function PostPage({ post }: { post: Post }) {
                     </>
                 )}
             </Head>
-            <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6">
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8">
-                    <article className="prose prose-invert mt-6 mx-auto max-w-[90ch] lg:max-w-[100ch]">
+            <div className="mx-auto w-full max-w-[1400px] px-3 md:px-6 min-w-0">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8 min-w-0">
+                    <article className="prose prose-invert mt-6 mx-auto max-w-[90ch] lg:max-w-[100ch] min-w-0 overflow-hidden">
                         <h1>{post.title}</h1>
                         <p className="text-sm text-muted-foreground">
                             <time dateTime={post.date}>

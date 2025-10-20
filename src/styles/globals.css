@@ -308,3 +308,146 @@
         padding-bottom: 24px;
     }
 }
+
+/* Mobile-friendly blog post styles */
+@layer utilities {
+    /* Ensure prose content respects mobile boundaries */
+    .prose {
+        max-width: 100% !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+
+    /* Mobile-friendly code blocks */
+    .prose pre {
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: pre;
+        word-wrap: normal;
+        word-break: normal;
+    }
+
+    .prose pre code {
+        white-space: pre;
+        word-wrap: normal;
+        word-break: normal;
+    }
+
+    /* Mobile-friendly inline code */
+    .prose :where(code):not(:where([class~="not-prose"] *)) {
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    /* Mobile-friendly tables */
+    .prose table {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+    }
+
+    .prose thead,
+    .prose tbody,
+    .prose tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .prose th,
+    .prose td {
+        word-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+        min-width: 100px;
+    }
+
+    /* Long URLs and text in tables */
+    .prose td {
+        white-space: normal;
+    }
+
+    /* Prevent images from overflowing */
+    .prose img {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Responsive container adjustments */
+    @media (max-width: 768px) {
+        .prose {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        /* Make table scrollable on very small screens */
+        .prose table {
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow-x: scroll;
+            display: block;
+        }
+        
+        .prose table thead,
+        .prose table tbody,
+        .prose table tr {
+            display: table;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        /* Adjust code block font size for mobile */
+        .prose pre {
+            font-size: 0.75rem;
+            padding: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        /* Better spacing for mobile */
+        .prose h1,
+        .prose h2,
+        .prose h3,
+        .prose h4,
+        .prose h5,
+        .prose h6 {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        /* Handle long URLs and links better on mobile */
+        .prose a {
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+
+        /* Handle blockquotes on mobile */
+        .prose blockquote {
+            margin-left: 0;
+            margin-right: 0;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+
+    /* Force break long words and URLs anywhere */
+    .prose p,
+    .prose li,
+    .prose td {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+
+    /* Specific handling for very long strings like hashes, URLs, etc. */
+    .prose code:not(pre code) {
+        word-break: break-all;
+        white-space: pre-wrap;
+    }
+}
