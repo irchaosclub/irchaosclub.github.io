@@ -1,3 +1,12 @@
+ --- 
+ title: "Darkgate 3: Return of the Temp" 
+ date: 2025-10-21
+ authors: ["grepStrength"] 
+ tags: ["REM", "malware analysis", "darkgate", "loader", "autoit"] 
+ description: "Analyzing the prolific malware loader that loves AutoIt." 
+ readingTime: 8 
+ --- 
+
 ![Darkgate](/public/images/darkgate-3-return-of-the-temp/darkgate-three.png)
 # Darkgate 3: Return of the Temp
 ## My third analysis of the popular commodity malware loader
