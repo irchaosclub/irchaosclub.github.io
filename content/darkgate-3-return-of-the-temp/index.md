@@ -239,3 +239,5 @@ Or:
 
 - Regex Generator: https://regex-generator.olafneumann.org/?sampleText=&flags=i
 
+`fmt.Println(“Thanks for reading! If you enjoyed this article, please buy me a coffee!”, https://buymeacoffee.com/grepstrength)`
+![Coffee](/public/images/darkgate-3-return-of-the-temp/coffee.gif)
