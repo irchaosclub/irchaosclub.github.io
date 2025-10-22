@@ -1,5 +1,5 @@
 // src/components/people/PersonCard.tsx
-import { Globe, Github, Mail, Twitter, Linkedin, ExternalLink } from "lucide-react";
+import { Globe, Github, Mail, Twitter, Linkedin, ExternalLink, AtSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type Person = {
@@ -11,6 +11,7 @@ export type Person = {
         github?: string;
         linkedin?: string; // NEW
         twitter?: string;  // X/Twitter
+        mastodon?: string; // Mastodon profile
         email?: string;    // mailto:
     };
 };
@@ -35,7 +36,7 @@ export function PersonCard({ person, className }: { person: Person; className?: 
                 </p>
             ) : null}
 
-            {(links?.website || links?.github || links?.linkedin || links?.twitter || links?.email) && (
+            {(links?.website || links?.github || links?.linkedin || links?.twitter || links?.mastodon || links?.email) && (
                 <ul className="mt-3 flex flex-wrap items-center gap-2 text-sm">
                     {links?.website && (
                         <li>
@@ -90,6 +91,20 @@ export function PersonCard({ person, className }: { person: Person; className?: 
                             >
                                 <Twitter className="h-4 w-4" />
                                 Twitter/X
+                                <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+                            </a>
+                        </li>
+                    )}
+                    {links?.mastodon && (
+                        <li>
+                            <a
+                                href={links.mastodon}
+                                target="_blank"
+                                rel="noopener"
+                                className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 hover:bg-muted/40"
+                            >
+                                <AtSign className="h-4 w-4" />
+                                Mastodon
                                 <ExternalLink className="h-3.5 w-3.5 opacity-70" />
                             </a>
                         </li>
