@@ -1,7 +1,7 @@
 import { useEffect, useRef, memo } from "react";
 import * as d3 from "d3-force";
 import { select } from "d3-selection";
-import { zoom, zoomIdentity } from "d3-zoom";
+import { zoom } from "d3-zoom";
 import { drag } from "d3-drag";
 import { KnowledgeGraph, GraphNode, GraphEdge } from "@/lib/knowledge-graph";
 
@@ -36,6 +36,28 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
 
     const svg = select(svgRef.current);
     svg.selectAll("*").remove();
+
+    // Add dotted grid pattern
+    const defs = svg.append("defs");
+    const pattern = defs.append("pattern")
+      .attr("id", "dot-pattern")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", 20)
+      .attr("height", 20)
+      .attr("patternUnits", "userSpaceOnUse");
+
+    pattern.append("circle")
+      .attr("cx", 1)
+      .attr("cy", 1)
+      .attr("r", 1)
+      .attr("fill", "hsl(var(--border))")
+      .attr("opacity", 0.3);
+
+    svg.append("rect")
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("fill", "url(#dot-pattern)");
 
     const container = svg.append("g");
 
@@ -202,7 +224,6 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
         return `${d.metadata.postCount} posts`;
       });
 
-    let hasAutoFit = false;
     simulation.on("tick", () => {
       link
         .attr("x1", d => (d.source as SimulationNode).x ?? 0)
@@ -211,47 +232,6 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
         .attr("y2", d => (d.target as SimulationNode).y ?? 0);
 
       node.attr("transform", d => `translate(${d.x ?? 0},${d.y ?? 0})`);
-    });
-
-    simulation.on("end", () => {
-      if (!hasAutoFit && nodes.length > 0) {
-        hasAutoFit = true;
-
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        nodes.forEach(d => {
-          if (d.x !== undefined && d.y !== undefined) {
-            minX = Math.min(minX, d.x);
-            minY = Math.min(minY, d.y);
-            maxX = Math.max(maxX, d.x);
-            maxY = Math.max(maxY, d.y);
-          }
-        });
-
-        const padding = 100;
-        minX -= padding;
-        minY -= padding;
-        maxX += padding;
-        maxY += padding;
-
-        const boundsWidth = maxX - minX;
-        const boundsHeight = maxY - minY;
-
-        const scale = Math.min(
-          width / boundsWidth,
-          height / boundsHeight,
-          1.5
-        );
-
-        const translateX = width / 2 - (minX + boundsWidth / 2) * scale;
-        const translateY = height / 2 - (minY + boundsHeight / 2) * scale;
-
-        (svg as any).transition()
-          .duration(750)
-          .call(
-            zoomBehavior.transform,
-            zoomIdentity.translate(translateX, translateY).scale(scale)
-          );
-      }
     });
 
     return () => {
@@ -265,7 +245,7 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
       width={width}
       height={height}
       style={{
-        background: 'hsl(var(--muted))',
+        background: 'hsl(var(--background))',
         display: 'block',
         width: '100%',
         height: '100%'
