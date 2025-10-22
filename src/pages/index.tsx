@@ -198,9 +198,27 @@ function MobilePosts({
 
 /* ----- build-time data ----- */
 export async function getStaticProps() {
-  const posts = [...allPosts].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  const posts = [...allPosts]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map(post => {
+      // Only pass metadata, exclude body and _raw to reduce bundle size
+      const metadata: any = {
+        slug: post.slug,
+        title: post.title,
+        date: post.date,
+      };
+
+      // Only include fields if they exist (Next.js can't serialize undefined)
+      if (post.authors) metadata.authors = post.authors;
+      if (post.tags) metadata.tags = post.tags;
+      if (post.description) metadata.description = post.description;
+      if (post.readingTime) metadata.readingTime = post.readingTime;
+      if (post.external) metadata.external = post.external;
+      if (post.spotifyTrack) metadata.spotifyTrack = post.spotifyTrack;
+      if (post.corporate !== undefined) metadata.corporate = post.corporate;
+
+      return metadata;
+    });
   return { props: { posts: posts as ExtendedPost[] } };
 }
 type Props = { posts: ExtendedPost[] };
