@@ -388,6 +388,21 @@ export default function Home({ posts }: Props) {
 
     if (q && typeof q === 'string') {
       queryParts.push(q);
+
+      // Parse date filters from query string
+      const parsed = parseQuery(q);
+
+      if (parsed.after && parsed.before) {
+        try {
+          const start = new Date(parsed.after);
+          const end = new Date(parsed.before);
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            setRange({ start, end });
+          }
+        } catch (e) {
+          // Invalid date format, ignore
+        }
+      }
     }
 
     if (authors) {
@@ -412,7 +427,14 @@ export default function Home({ posts }: Props) {
     }
     if (days && typeof days === 'string') {
       const d = parseInt(days, 10);
-      if (!isNaN(d)) setDaysFacet(d);
+      if (!isNaN(d)) {
+        setDaysFacet(d);
+        // Calculate range for days facet
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - d + 1);
+        setRange({ start, end });
+      }
     }
 
     // Set the constructed query in the search box
@@ -620,11 +642,23 @@ export default function Home({ posts }: Props) {
   // helpers
   function toggleFacet(
     setter: React.Dispatch<React.SetStateAction<Set<string>>>,
-    value: string
+    value: string,
+    filterType: 'author' | 'tag'
   ) {
     setter((prev) => {
       const next = new Set(prev);
-      next.has(value) ? next.delete(value) : next.add(value);
+      const isRemoving = next.has(value);
+
+      if (isRemoving) {
+        next.delete(value);
+        // Remove from query
+        setQuery(q => toggleFilter(q, filterType, value));
+      } else {
+        next.add(value);
+        // Add to query
+        setQuery(q => toggleFilter(q, filterType, value));
+      }
+
       return next;
     });
   }
@@ -797,7 +831,7 @@ export default function Home({ posts }: Props) {
                               <Checkbox
                                 checked={authorFacet.has(name)}
                                 onCheckedChange={() =>
-                                  toggleFacet(setAuthorFacet, name)
+                                  toggleFacet(setAuthorFacet, name, 'author')
                                 }
                               />
                               <span className="text-sm">{name}</span>
@@ -832,9 +866,17 @@ export default function Home({ posts }: Props) {
                           <label className="flex items-center gap-2">
                             <Checkbox
                               checked={typeFacet.has(type)}
-                              onCheckedChange={() =>
-                                toggleFacet(setTypeFacet, type)
-                              }
+                              onCheckedChange={() => {
+                                setTypeFacet((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(type)) {
+                                    next.delete(type);
+                                  } else {
+                                    next.add(type);
+                                  }
+                                  return next;
+                                });
+                              }}
                             />
                             <div className="flex items-center gap-1.5">
                               {type === "internal" ? (
@@ -876,7 +918,7 @@ export default function Home({ posts }: Props) {
                               <Checkbox
                                 checked={tagFacet.has(tag)}
                                 onCheckedChange={() =>
-                                  toggleFacet(setTagFacet, tag)
+                                  toggleFacet(setTagFacet, tag, 'tag')
                                 }
                               />
                               <span className="text-sm">{tag}</span>
@@ -997,8 +1039,8 @@ export default function Home({ posts }: Props) {
                 }}
                 authorFacet={authorFacet}
                 tagFacet={tagFacet}
-                toggleAuthor={(a) => toggleFacet(setAuthorFacet, a)}
-                toggleTag={(t) => toggleFacet(setTagFacet, t)}
+                toggleAuthor={(a) => toggleFacet(setAuthorFacet, a, 'author')}
+                toggleTag={(t) => toggleFacet(setTagFacet, t, 'tag')}
               />
             )}
             {/* Desktop: scrollable table that fills the remaining height */}
@@ -1070,7 +1112,7 @@ export default function Home({ posts }: Props) {
                                           }
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            toggleFacet(setAuthorFacet, a);
+                                            toggleFacet(setAuthorFacet, a, 'author');
                                           }}
                                         >
                                           {a}
@@ -1098,7 +1140,7 @@ export default function Home({ posts }: Props) {
                                       }
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        toggleFacet(setTagFacet, t);
+                                        toggleFacet(setTagFacet, t, 'tag');
                                       }}
                                     >
                                       {t}
@@ -1171,7 +1213,7 @@ export default function Home({ posts }: Props) {
                         <Pill
                           key={a}
                           variant={authorFacet.has(a) ? "solid" : "soft"}
-                          onClick={() => toggleFacet(setAuthorFacet, a)}
+                          onClick={() => toggleFacet(setAuthorFacet, a, 'author')}
                         >
                           {a}
                         </Pill>
@@ -1201,7 +1243,7 @@ export default function Home({ posts }: Props) {
                         <Pill
                           key={t}
                           variant={tagFacet.has(t) ? "solid" : "soft"}
-                          onClick={() => toggleFacet(setTagFacet, t)}
+                          onClick={() => toggleFacet(setTagFacet, t, 'tag')}
                         >
                           {t}
                         </Pill>
