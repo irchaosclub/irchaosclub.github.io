@@ -211,21 +211,27 @@ Darkgate will obfuscate itself by impersonating G DATA software by naming itself
 ## Indicators of Compromise (IOCs)
 
 AVKTray.exe (Darkgate) SHA-256:
+
 ```c43c3db16dcfabf532f0949c42cf39f1324ce9edbd3f34d65d38a0cf98491157```
 
 Autoit3.exe SHA-256:
+
 ```237d1bca6e056df5bb16a1216a434634109478f882d3b1d58344c801d184f95d```
 
 script.a3x SHA-256:
+
 ```98d2e34e1fb92e8180621e0d0cfd6c8e4730cb85ba8f29b4153a85fcb036b4a3```
 
 ebccdca.a3x SHA-256:
+
 ```98d2e34e1fb92e8180621e0d0cfd6c8e4730cb85ba8f29b4153a85fcb036b4a3```
 
 baKGGKH SHA-256:
+
 ```13638d70787ef3e1800adc536f780cf23686578ac4fae6607b6ef37013322d75```
 
 Domain:
+
 ```todayput[.]shop```
 
 
@@ -248,5 +254,7 @@ Or:
 
 - Regex Generator: https://regex-generator.olafneumann.org/?sampleText=&flags=i
 
-`fmt.Println(“Thanks for reading! If you enjoyed this article, please buy me a coffee!”, https://buymeacoffee.com/grepstrength)`
-![Coffee](/images/darkgate-3-return-of-the-temp/coffee.gif)
+---
+
+fmt.Println(“Thanks for reading! If you enjoyed this article, [please buy me a coffee](https://buymeacoffee.com/grepstrength)!”)
+![Coffee](/public/images/darkgate-3-return-of-the-temp/coffee.gif)
