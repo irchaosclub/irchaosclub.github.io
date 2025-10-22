@@ -387,6 +387,13 @@ export default function Home({ posts }: Props) {
     }
   }, [query, authorFacet, tagFacet, typeFacet, daysFacet, initialLoadDone, router]);
 
+  // Clear daysFacet when range is selected from histogram (mutually exclusive)
+  useEffect(() => {
+    if (range && daysFacet !== null) {
+      setDaysFacet(null);
+    }
+  }, [range, daysFacet]);
+
   // query parse
   const q = useMemo(() => parseQuery(query), [query]);
 
@@ -601,28 +608,40 @@ export default function Home({ posts }: Props) {
                     <Button
                       variant={daysFacet === 7 ? "secondary" : "outline"}
                       size="sm"
-                      onClick={() => setDaysFacet(daysFacet === 7 ? null : 7)}
+                      onClick={() => {
+                        setDaysFacet(daysFacet === 7 ? null : 7);
+                        setRange(null);
+                      }}
                     >
                       Last 7d
                     </Button>
                     <Button
                       variant={daysFacet === 30 ? "secondary" : "outline"}
                       size="sm"
-                      onClick={() => setDaysFacet(daysFacet === 30 ? null : 30)}
+                      onClick={() => {
+                        setDaysFacet(daysFacet === 30 ? null : 30);
+                        setRange(null);
+                      }}
                     >
                       Last 30d
                     </Button>
                     <Button
                       variant={daysFacet === 90 ? "secondary" : "outline"}
                       size="sm"
-                      onClick={() => setDaysFacet(daysFacet === 90 ? null : 90)}
+                      onClick={() => {
+                        setDaysFacet(daysFacet === 90 ? null : 90);
+                        setRange(null);
+                      }}
                     >
                       Last 90d
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setDaysFacet(null)}
+                      onClick={() => {
+                        setDaysFacet(null);
+                        setRange(null);
+                      }}
                     >
                       All time
                     </Button>
@@ -823,7 +842,11 @@ export default function Home({ posts }: Props) {
 
           {!isMobile && showHistogram && (
             <Panel header="New Posts" description="Monthly volume of new posts">
-              <PostAreaInteractive bins={bins} />
+              <PostAreaInteractive
+                bins={bins}
+                selectedRange={range}
+                onRangeSelect={setRange}
+              />
             </Panel>
           )}
 

@@ -8,6 +8,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  ReferenceArea,
 } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
@@ -19,13 +20,67 @@ export type Bin = {
   count: number;
 };
 
-export function PostAreaInteractive({ bins }: { bins: Bin[] }) {
+interface PostAreaInteractiveProps {
+  bins: Bin[];
+  selectedRange?: { start: Date; end: Date } | null;
+  onRangeSelect?: (range: { start: Date; end: Date } | null) => void;
+}
+
+export function PostAreaInteractive({
+  bins,
+  selectedRange,
+  onRangeSelect
+}: PostAreaInteractiveProps) {
   const data = React.useMemo(() => bins.map((b) => ({ ...b })), [bins]);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [selectionStart, setSelectionStart] = React.useState<string | null>(null);
+  const [selectionEnd, setSelectionEnd] = React.useState<string | null>(null);
+  const [isSelecting, setIsSelecting] = React.useState(false);
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleMouseDown = (e: any) => {
+    if (e && e.activeLabel) {
+      setIsSelecting(true);
+      setSelectionStart(e.activeLabel);
+      setSelectionEnd(e.activeLabel);
+    }
+  };
+
+  const handleMouseMove = (e: any) => {
+    if (isSelecting && e && e.activeLabel) {
+      setSelectionEnd(e.activeLabel);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isSelecting && selectionStart && selectionEnd) {
+      const startIdx = data.findIndex((d) => d.label === selectionStart);
+      const endIdx = data.findIndex((d) => d.label === selectionEnd);
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        const minIdx = Math.min(startIdx, endIdx);
+        const maxIdx = Math.max(startIdx, endIdx);
+
+        const range = {
+          start: data[minIdx].start,
+          end: data[maxIdx].end,
+        };
+
+        onRangeSelect?.(range);
+      }
+    }
+    setIsSelecting(false);
+    setSelectionStart(null);
+    setSelectionEnd(null);
+  };
+
+  const handleDoubleClick = () => {
+    // Double click to clear selection
+    onRangeSelect?.(null);
+  };
 
   if (!isMounted) {
     return (
@@ -33,53 +88,102 @@ export function PostAreaInteractive({ bins }: { bins: Bin[] }) {
     );
   }
 
+  // Determine which bins are in the selected range
+  let refAreaLeft: string | undefined;
+  let refAreaRight: string | undefined;
+
+  if (selectedRange) {
+    const startBin = data.find((d) => d.end >= selectedRange.start);
+    const endBin = data.find((d) => d.start <= selectedRange.end && d.end >= selectedRange.end);
+    if (startBin) refAreaLeft = startBin.label;
+    if (endBin) refAreaRight = endBin.label;
+  } else if (isSelecting && selectionStart && selectionEnd) {
+    const startIdx = data.findIndex((d) => d.label === selectionStart);
+    const endIdx = data.findIndex((d) => d.label === selectionEnd);
+    if (startIdx !== -1 && endIdx !== -1) {
+      refAreaLeft = data[Math.min(startIdx, endIdx)].label;
+      refAreaRight = data[Math.max(startIdx, endIdx)].label;
+    }
+  }
+
   return (
-    <ChartContainer
-      className="w-full h-[180px] min-h-[180px]"
-      config={{ accent: "var(--primary)" }}
-    >
-      <ResponsiveContainer width="100%" height={180} minHeight={180}>
-        <AreaChart
-          data={data}
-          margin={{ top: 6, right: 8, left: 8, bottom: 8 }}
-        >
-          <CartesianGrid
-            stroke="var(--border)"
-            strokeDasharray="3 6"
-            vertical={false}
-          />
-          <XAxis
-            dataKey="label"
-            tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-            axisLine={{ stroke: "var(--border)" }}
-            tickLine={{ stroke: "var(--border)" }}
-          />
-          <YAxis
-            allowDecimals={false}
-            tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-            axisLine={{ stroke: "var(--border)" }}
-            tickLine={{ stroke: "var(--border)" }}
-          />
-          <Tooltip
-            content={<ChartTooltipContent />}
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
-          />
-          <Area
-            type="monotone"
-            dataKey="count"
-            stroke="var(--primary)"
-            strokeWidth={2}
-            fill="color-mix(in srgb, var(--primary) 22%, transparent)"
-            dot={{
-              r: 2,
-              stroke: "var(--primary)",
-              strokeWidth: 1,
-              fill: "var(--primary)",
-            }}
-            activeDot={{ r: 3 }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </ChartContainer>
+    <div className="relative">
+      {selectedRange && (
+        <div className="absolute top-0 right-0 z-10">
+          <button
+            onClick={() => onRangeSelect?.(null)}
+            className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded bg-muted/50 hover:bg-muted transition-colors"
+            title="Clear time range selection"
+          >
+            Clear Range
+          </button>
+        </div>
+      )}
+      <ChartContainer
+        className="w-full h-[180px] min-h-[180px] cursor-crosshair"
+        config={{ accent: "var(--primary)" }}
+      >
+        <ResponsiveContainer width="100%" height={180} minHeight={180}>
+          <AreaChart
+            data={data}
+            margin={{ top: 6, right: 8, left: 8, bottom: 8 }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onDoubleClick={handleDoubleClick}
+          >
+            <CartesianGrid
+              stroke="var(--border)"
+              strokeDasharray="3 6"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              axisLine={{ stroke: "var(--border)" }}
+              tickLine={{ stroke: "var(--border)" }}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              axisLine={{ stroke: "var(--border)" }}
+              tickLine={{ stroke: "var(--border)" }}
+            />
+            <Tooltip
+              content={<ChartTooltipContent />}
+              cursor={{ fill: "rgba(255,255,255,0.04)" }}
+            />
+            {refAreaLeft && refAreaRight && (
+              <ReferenceArea
+                x1={refAreaLeft}
+                x2={refAreaRight}
+                strokeOpacity={0.3}
+                fill="var(--primary)"
+                fillOpacity={0.2}
+              />
+            )}
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="var(--primary)"
+              strokeWidth={2}
+              fill="color-mix(in srgb, var(--primary) 22%, transparent)"
+              dot={{
+                r: 2,
+                stroke: "var(--primary)",
+                strokeWidth: 1,
+                fill: "var(--primary)",
+              }}
+              activeDot={{ r: 3 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+      {!selectedRange && (
+        <p className="text-xs text-muted-foreground text-center mt-1">
+          Click and drag to select a time range • Double-click to clear
+        </p>
+      )}
+    </div>
   );
 }
