@@ -24,10 +24,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      # build (runs contentlayer + postbuild RSS) AND export to ./out
+      # build (runs contentlayer + next build with output:export) AND generate RSS
       - run: npm run static
         env:
-          NEXT_PUBLIC_SITE_URL: https://irchaos.club   # change if a project site
+          NEXT_PUBLIC_SITE_URL: https://irchaos.club
       - run: touch ./out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

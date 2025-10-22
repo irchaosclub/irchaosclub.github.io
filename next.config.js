@@ -1,8 +1,7 @@
-// next.config.js
-const { withContentlayer } = require('next-contentlayer');
+import { withContentlayer } from "next-contentlayer";
 
-module.exports = withContentlayer({
-    output: 'export',
-    trailingSlash: true,
-    reactStrictMode: true
+export default withContentlayer({
+  output: "export",
+  trailingSlash: true,
+  reactStrictMode: true,
 });
