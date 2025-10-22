@@ -25,4 +25,16 @@ export const PEOPLE: Person[] = [
       linkedin: "https://www.linkedin.com/in/kelvin-winborne/",
     },
   },
+  {
+    name: "Rad",
+    role: "\"\"\"Founder of IRCC\"\"\"",
+    bio: "\"\"\"Founded IRCC\"\"\"",
+    links: {
+      website: "https://deceptiq.com",
+      github: "https://github.com/deceptiq",
+      linkedin: "https://linkedin.com/company/deceptiq/",
+      email: "mailto:hey@deceptiq.com",
+      twitter: "https://x.com/deceptiq_"
+    },
+  },
 ];

@@ -89,13 +89,18 @@ export function PostAreaInteractive({
         }
         clickTimeoutRef.current = setTimeout(() => {
           onRangeSelect?.(range);
+          setIsSelecting(false);
+          setSelectionStart(null);
+          setSelectionEnd(null);
           clickTimeoutRef.current = null;
-        }, 250);
+        }, 100);
       }
+    } else {
+      // No valid selection, clear immediately
+      setIsSelecting(false);
+      setSelectionStart(null);
+      setSelectionEnd(null);
     }
-    setIsSelecting(false);
-    setSelectionStart(null);
-    setSelectionEnd(null);
   };
 
   const handleDoubleClick = () => {

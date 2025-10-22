@@ -750,7 +750,7 @@ export default function Home({ posts }: Props) {
     <>
       <SEO canonical="/" />
       <div className="overflow-x-hidden">
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(300px,340px)] gap-5 min-h-0 px-4 md:px-6 xl:px-8 overflow-hidden">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(300px,340px)] gap-5 min-h-[calc(100vh-var(--header-h)-32px)] px-4 md:px-6 xl:px-8">
         {" "}
         <aside className="order-2 xl:order-1">
           <Panel
