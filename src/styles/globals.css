@@ -288,6 +288,18 @@
     animation: caret-blink 1s steps(1, end) infinite;
 }
 
+/* ---- Slide up animation for PostCTA ---- */
+@keyframes slideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(2rem);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @layer components {
     .kbd {
         @apply rounded border border-border bg-muted/20 px-1.5 py-0.5 font-mono text-xs;

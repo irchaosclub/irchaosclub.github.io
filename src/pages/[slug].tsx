@@ -1,7 +1,12 @@
 import Head from "next/head";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { allPosts, Post } from "contentlayer/generated";
+import { ExtendedPost } from "@/types/post";
 import { TableOfContents } from "@/components/post/TableOfContents";
+import { PostCTA } from "@/components/post/PostCTA";
+import { SEO } from "@/components/seo/SEO";
+import { Pill } from "@/components/ui/pill";
 
 export async function getStaticPaths() {
   return {
@@ -12,11 +17,11 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
   const post = allPosts.find((p) => p.slug === params.slug) || null;
-  return { props: { post } };
+  return { props: { post: post as ExtendedPost } };
 }
 
-export default function PostPage({ post }: { post: Post }) {
-  const external = (post as any).external as string | undefined;
+export default function PostPage({ post }: { post: ExtendedPost }) {
+  const external = post.external;
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
   useEffect(() => {
@@ -45,30 +50,73 @@ export default function PostPage({ post }: { post: Post }) {
 
   return (
     <>
-      <Head>
-        <title>{post.title}</title>
-        {(post as any).spotifyTrack && (
-          <>
-            <link rel="preconnect" href="https://open.spotify.com" />
-            <link rel="dns-prefetch" href="https://open.spotify.com" />
-          </>
-        )}
-      </Head>
-      <div className="mx-auto w-full max-w-[1400px] px-0 sm:px-3 md:px-6 min-w-0 overflow-x-hidden">
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8 min-w-0 max-w-full overflow-x-hidden">
-          <article className="mobile-article prose-theme mt-6 mx-auto w-full max-w-full sm:max-w-[90ch] lg:max-w-[100ch] min-w-0 overflow-hidden px-4 sm:px-0">
+      <SEO
+        title={post.title}
+        description={post.description}
+        canonical={`/${post.slug}/`}
+        ogType="article"
+        article={{
+          publishedTime: post.date,
+          authors: post.authors,
+          tags: post.tags,
+        }}
+      />
+      {post.spotifyTrack && (
+        <Head>
+          <link rel="preconnect" href="https://open.spotify.com" />
+          <link rel="dns-prefetch" href="https://open.spotify.com" />
+        </Head>
+      )}
+      <div className="mx-auto w-full max-w-[1400px] px-0 sm:px-3 md:px-6 min-w-0">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-8 min-w-0 max-w-full">
+          <article className="mobile-article prose-theme mt-6 mx-auto w-full max-w-full sm:max-w-[90ch] lg:max-w-[100ch] min-w-0 px-4 sm:px-0">
             <h1>{post.title}</h1>
-            <p className="text-sm text-muted-foreground">
-              <time dateTime={post.date}>
-                {new Date(post.date).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "long",
-                  day: "2-digit",
-                })}
-              </time>
-            </p>
 
-            {(post as any).spotifyTrack && (
+            <div className="flex flex-col gap-2 not-prose mb-6">
+              <p className="text-sm text-muted-foreground">
+                <time dateTime={post.date}>
+                  {new Date(post.date).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "2-digit",
+                  })}
+                </time>
+                {post.readingTime && (
+                  <span className="mx-2">•</span>
+                )}
+                {post.readingTime && (
+                  <span>~{post.readingTime} min read</span>
+                )}
+              </p>
+
+              {post.authors && post.authors.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-muted-foreground">By</span>
+                  {post.authors.map((author) => (
+                    <Link key={author} href={`/?authors=${encodeURIComponent(author)}`}>
+                      <Pill variant="soft" className="cursor-pointer hover:bg-primary/20">
+                        {author}
+                      </Pill>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-muted-foreground">Tags:</span>
+                  {post.tags.map((tag) => (
+                    <Link key={tag} href={`/?tags=${encodeURIComponent(tag)}`}>
+                      <Pill variant="soft" className="cursor-pointer hover:bg-primary/20">
+                        {tag}
+                      </Pill>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {post.spotifyTrack && (
               <div className="not-prose my-6">
                 <p className="text-sm font-medium mb-3">
                   Recommended song to listen to while reading:
@@ -100,9 +148,7 @@ export default function PostPage({ post }: { post: Post }) {
                       opacity: iframeLoaded ? 1 : 0,
                       transition: "opacity 0.3s ease-in-out",
                     }}
-                    src={`https://open.spotify.com/embed/track/${
-                      (post as any).spotifyTrack
-                    }?utm_source=generator&theme=0`}
+                    src={`https://open.spotify.com/embed/track/${post.spotifyTrack}?utm_source=generator&theme=0`}
                     frameBorder="0"
                     allowFullScreen={true}
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -119,12 +165,15 @@ export default function PostPage({ post }: { post: Post }) {
               dangerouslySetInnerHTML={{ __html: post.body.html }}
             />
           </article>
-          {/* shadcn TOC (hidden on smaller screens) */}
-          <aside className="hidden xl:block py-8">
-            <TableOfContents target="#post-body" />
+          {/* TOC (hidden on smaller screens) */}
+          <aside className="hidden xl:block">
+            <div className="sticky top-[calc(var(--header-h)+2rem)] pt-8">
+              <TableOfContents target="#post-body" />
+            </div>
           </aside>
         </div>
       </div>
+      <PostCTA title={post.title} slug={post.slug} />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Rss } from "lucide-react";
 import ThemePicker from "@/components/theme/ThemePicker";
+import { SITE_CONFIG } from "@/lib/constants";
 
 export default function Header() {
   return (
@@ -28,9 +29,9 @@ export default function Header() {
               About
             </Link>
             <a
-              href="https://discord.gg/hGPsPGMa"
+              href={SITE_CONFIG.links.discord}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="hover:underline"
             >
               Discord

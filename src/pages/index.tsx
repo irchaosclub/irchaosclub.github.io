@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useMemo, useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
 import { allPosts, Post } from "contentlayer/generated";
+import { ExtendedPost, getPostType } from "@/types/post";
 import { Pill } from "@/components/ui/pill";
 import {
   Table,
@@ -36,6 +38,7 @@ import {
 import { InfoBox } from "@/components/ui/infobox";
 import { MobilePostSheet } from "@/components/mobile/MobilePostSheet";
 import { CliSearch } from "@/components/search/CliSearch";
+import { SEO } from "@/components/seo/SEO";
 
 // Detects if the title wraps >1 line and adds extra vertical padding only then.
 // Adds a bit of vertical padding only when the title wraps onto multiple lines.
@@ -111,8 +114,8 @@ function MobilePosts({
   toggleAuthor,
   toggleTag,
 }: {
-  posts: Post[];
-  onCardClick: (p: Post) => void;
+  posts: ExtendedPost[];
+  onCardClick: (p: ExtendedPost) => void;
   authorFacet: Set<string>;
   tagFacet: Set<string>;
   toggleAuthor: (a: string) => void;
@@ -121,9 +124,9 @@ function MobilePosts({
   return (
     <div className="space-y-2">
       {posts.map((p) => {
-        const ext = (p as any).external as string | undefined;
-        const authors = ((p as any).authors ?? []) as string[];
-        const tags = ((p as any).tags ?? []) as string[];
+        const ext = p.external;
+        const authors = p.authors ?? [];
+        const tags = p.tags ?? [];
         return (
           <button
             key={p.slug}
@@ -196,9 +199,9 @@ export async function getStaticProps() {
   const posts = [...allPosts].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
-  return { props: { posts } };
+  return { props: { posts: posts as ExtendedPost[] } };
 }
-type Props = { posts: Post[] };
+type Props = { posts: ExtendedPost[] };
 
 /* ----- helpers ----- */
 type Counts = Record<string, number>;
@@ -209,6 +212,9 @@ function countValues(values: string[] | undefined): Counts {
 }
 
 export default function Home({ posts }: Props) {
+  const router = useRouter();
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+
   function resetAll() {
     setQuery("");
     setRange(null);
@@ -331,6 +337,56 @@ export default function Home({ posts }: Props) {
   const [typeFacet, setTypeFacet] = useState<Set<string>>(new Set());
   const [daysFacet, setDaysFacet] = useState<number | null>(null);
 
+  // Load filters from URL on mount
+  useEffect(() => {
+    if (!router.isReady || initialLoadDone) return;
+
+    const { q, authors, tags, type, days } = router.query;
+
+    if (q && typeof q === 'string') {
+      setQuery(q);
+    }
+    if (authors) {
+      const authorList = typeof authors === 'string' ? authors.split(',') : authors;
+      setAuthorFacet(new Set(authorList));
+    }
+    if (tags) {
+      const tagList = typeof tags === 'string' ? tags.split(',') : tags;
+      setTagFacet(new Set(tagList));
+    }
+    if (type) {
+      const typeList = typeof type === 'string' ? type.split(',') : type;
+      setTypeFacet(new Set(typeList));
+    }
+    if (days && typeof days === 'string') {
+      const d = parseInt(days, 10);
+      if (!isNaN(d)) setDaysFacet(d);
+    }
+
+    setInitialLoadDone(true);
+  }, [router.isReady, router.query, initialLoadDone]);
+
+  // Sync filters to URL
+  useEffect(() => {
+    if (!initialLoadDone) return;
+
+    const params = new URLSearchParams();
+
+    if (query) params.set('q', query);
+    if (authorFacet.size) params.set('authors', Array.from(authorFacet).join(','));
+    if (tagFacet.size) params.set('tags', Array.from(tagFacet).join(','));
+    if (typeFacet.size) params.set('type', Array.from(typeFacet).join(','));
+    if (daysFacet !== null) params.set('days', daysFacet.toString());
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `/?${queryString}` : '/';
+
+    // Only update if URL changed
+    if (router.asPath !== newUrl) {
+      router.replace(newUrl, undefined, { shallow: true });
+    }
+  }, [query, authorFacet, tagFacet, typeFacet, daysFacet, initialLoadDone, router]);
+
   // query parse
   const q = useMemo(() => parseQuery(query), [query]);
 
@@ -341,10 +397,10 @@ export default function Home({ posts }: Props) {
         matchesQuery(
           {
             title: p.title,
-            authors: (p as any).authors,
-            tags: (p as any).tags,
+            authors: p.authors,
+            tags: p.tags,
             date: p.date,
-            description: (p as any).description,
+            description: p.description,
           },
           q
         )
@@ -357,7 +413,7 @@ export default function Home({ posts }: Props) {
   const histogramSource = useMemo(() => {
     return filteredByQuery.filter((p) => {
       if (authorFacet.size) {
-        const pa = new Set<string>((p as any).authors ?? []);
+        const pa = new Set<string>(p.authors ?? []);
         let ok = false;
         for (const a of authorFacet)
           if (pa.has(a)) {
@@ -367,7 +423,7 @@ export default function Home({ posts }: Props) {
         if (!ok) return false;
       }
       if (tagFacet.size) {
-        const pt = new Set<string>((p as any).tags ?? []);
+        const pt = new Set<string>(p.tags ?? []);
         let ok = false;
         for (const t of tagFacet)
           if (pt.has(t)) {
@@ -377,7 +433,7 @@ export default function Home({ posts }: Props) {
         if (!ok) return false;
       }
       if (typeFacet.size) {
-        const postType = (p as any).external ? "external" : "internal";
+        const postType = getPostType(p);
         if (!typeFacet.has(postType)) return false;
       }
       return true;
@@ -389,22 +445,19 @@ export default function Home({ posts }: Props) {
     () =>
       countValues(
         filteredByQuery
-          .filter((p) => !(p as any).corporate) // Exclude corporate posts from author facet
-          .flatMap((p) => ((p as any).authors ?? []) as string[])
+          .filter((p) => !p.corporate) // Exclude corporate posts from author facet
+          .flatMap((p) => p.authors ?? [])
       ),
     [filteredByQuery]
   );
   const tagCounts = useMemo(
-    () =>
-      countValues(
-        filteredByQuery.flatMap((p) => ((p as any).tags ?? []) as string[])
-      ),
+    () => countValues(filteredByQuery.flatMap((p) => p.tags ?? [])),
     [filteredByQuery]
   );
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const p of filteredByQuery) {
-      const type = (p as any).external ? "external" : "internal";
+      const type = getPostType(p);
       counts[type] = (counts[type] ?? 0) + 1;
     }
     return counts;
@@ -428,7 +481,7 @@ export default function Home({ posts }: Props) {
         return false;
 
       if (authorFacet.size) {
-        const pa = new Set<string>((p as any).authors ?? []);
+        const pa = new Set<string>(p.authors ?? []);
         let ok = false;
         for (const a of authorFacet)
           if (pa.has(a)) {
@@ -438,7 +491,7 @@ export default function Home({ posts }: Props) {
         if (!ok) return false;
       }
       if (tagFacet.size) {
-        const pt = new Set<string>((p as any).tags ?? []);
+        const pt = new Set<string>(p.tags ?? []);
         let ok = false;
         for (const t of tagFacet)
           if (pt.has(t)) {
@@ -448,7 +501,7 @@ export default function Home({ posts }: Props) {
         if (!ok) return false;
       }
       if (typeFacet.size) {
-        const postType = (p as any).external ? "external" : "internal";
+        const postType = getPostType(p);
         if (!typeFacet.has(postType)) return false;
       }
       return true;
@@ -524,7 +577,9 @@ export default function Home({ posts }: Props) {
 
   // ---------- JSX ----------
   return (
-    <div className="overflow-x-hidden">
+    <>
+      <SEO canonical="/" />
+      <div className="overflow-x-hidden">
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,260px)_minmax(0,1fr)_minmax(300px,340px)] gap-5 min-h-0 px-4 md:px-6 xl:px-8 overflow-hidden">
         {" "}
         <aside className="order-2 xl:order-1">
@@ -817,7 +872,7 @@ export default function Home({ posts }: Props) {
                     <TableBody>
                       {fullyFiltered.map((p) => {
                         const isSel = p.slug === selectedPost?.slug;
-                        const ext = (p as any).external as string | undefined;
+                        const ext = p.external;
                         return (
                           <TableRow
                             key={p.slug}
@@ -844,8 +899,8 @@ export default function Home({ posts }: Props) {
 
                             <TableCell className="whitespace-nowrap align-top">
                               <div className="flex flex-wrap gap-1">
-                                {(((p as any).authors ?? []) as string[]).length
-                                  ? ((p as any).authors as string[]).map(
+                                {(p.authors ?? []).length
+                                  ? (p.authors ?? []).map(
                                       (a) => (
                                         <Pill
                                           key={a}
@@ -875,7 +930,7 @@ export default function Home({ posts }: Props) {
 
                             <TableCell className="align-top">
                               <div className="flex flex-wrap gap-1">
-                                {(((p as any).tags ?? []) as string[]).map(
+                                {(p.tags ?? []).map(
                                   (t) => (
                                     <Pill
                                       key={t}
@@ -947,14 +1002,13 @@ export default function Home({ posts }: Props) {
                   </p>
                 </div>
 
-                {(((selectedPost as any).authors ?? []) as string[]).length >
-                  0 && (
+                {(selectedPost.authors ?? []).length > 0 && (
                   <div>
                     <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">
                       Authors:
                     </h3>
                     <div className="flex flex-wrap gap-1">
-                      {((selectedPost as any).authors as string[]).map((a) => (
+                      {(selectedPost.authors ?? []).map((a) => (
                         <Pill
                           key={a}
                           variant={authorFacet.has(a) ? "solid" : "soft"}
@@ -967,25 +1021,24 @@ export default function Home({ posts }: Props) {
                   </div>
                 )}
 
-                {(selectedPost as any).description && (
+                {selectedPost.description && (
                   <div>
                     <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">
                       Description:
                     </h3>
                     <InfoBox className="break-words">
-                      {(selectedPost as any).description}
+                      {selectedPost.description}
                     </InfoBox>
                   </div>
                 )}
 
-                {(((selectedPost as any).tags ?? []) as string[]).length >
-                  0 && (
+                {(selectedPost.tags ?? []).length > 0 && (
                   <div>
                     <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">
                       Tags:
                     </h3>
                     <div className="flex flex-wrap gap-1">
-                      {((selectedPost as any).tags as string[]).map((t) => (
+                      {(selectedPost.tags ?? []).map((t) => (
                         <Pill
                           key={t}
                           variant={tagFacet.has(t) ? "solid" : "soft"}
@@ -998,21 +1051,21 @@ export default function Home({ posts }: Props) {
                   </div>
                 )}
 
-                {(selectedPost as any).readingTime && (
+                {selectedPost.readingTime && (
                   <div>
                     <h3 className="text-xs font-mono text-foreground underline decoration-primary/50 underline-offset-2 mb-2 font-medium">
                       Reading Time:
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      ~{(selectedPost as any).readingTime} min read
+                      ~{selectedPost.readingTime} min read
                     </p>
                   </div>
                 )}
 
                 <div className="pt-1">
-                  {((selectedPost as any).external as string | undefined) ? (
+                  {selectedPost.external ? (
                     <a
-                      href={(selectedPost as any).external as string}
+                      href={selectedPost.external}
                       className="text-primary underline inline-flex items-center gap-1"
                     >
                       Open{" "}
@@ -1038,5 +1091,6 @@ export default function Home({ posts }: Props) {
         post={selectedPost}
       />
     </div>
+    </>
   );
 }

@@ -1,20 +1,19 @@
-import Head from "next/head";
 import Link from "next/link";
 import { ExternalLink, BookOpen } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
 import { PEOPLE } from "@/components/people/people";
 import { PersonCard } from "@/components/people/PersonCard";
+import { SEO } from "@/components/seo/SEO";
+import { SITE_CONFIG } from "@/lib/constants";
 
 export default function About() {
   return (
     <>
-      <Head>
-        <title>About — IRCC</title>
-        <meta
-          name="description"
-          content="About the Incident Response Chaos Club (IRCC) — a collective focused on DFIR, incident response, and security research."
-        />
-      </Head>
+      <SEO
+        title="About"
+        description="About the Incident Response Chaos Club (IRCC) — a collective focused on DFIR, incident response, and security research."
+        canonical="/about/"
+      />
 
       <main className="mx-auto w-full max-w-[980px] px-3 md:px-6 xl:pt-[calc(var(--header-h)+8px)]">
         {/* Hero */}
@@ -74,7 +73,7 @@ export default function About() {
             <div className="mt-3 flex flex-wrap gap-2">
               <a
                 className="inline-flex items-center gap-1 rounded-full bg-[#5865F2] px-3.5 py-2.5 text-sm md:text-base font-medium text-white shadow hover:brightness-110"
-                href="https://discord.gg/hGPsPGMa"
+                href={SITE_CONFIG.links.discord}
                 target="_blank"
                 rel="noopener noreferrer"
               >
