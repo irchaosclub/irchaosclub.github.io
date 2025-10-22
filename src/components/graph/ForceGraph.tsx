@@ -16,6 +16,8 @@ type ForceGraphProps = {
 type SimulationNode = GraphNode & {
   x?: number;
   y?: number;
+  vx?: number;
+  vy?: number;
   fx?: number | null;
   fy?: number | null;
 };
@@ -75,63 +77,205 @@ function ForceGraphComponent({ graph, selectedNodes, onNodeClick, width, height 
       return { source, target, relationship: e.relationship };
     });
 
+    // Build post-to-author mapping for clustering
+    const postToAuthor = new Map<string, string>();
+    
+    edges.forEach(edge => {
+      const source = edge.source as SimulationNode;
+      const target = edge.target as SimulationNode;
+      
+      if (source.type === 'author' && target.type === 'post') {
+        postToAuthor.set(target.id, source.id);
+      } else if (source.type === 'post' && target.type === 'author') {
+        postToAuthor.set(source.id, target.id);
+      }
+    });
+
     const simulation = d3.forceSimulation<SimulationNode>(nodes)
       .force("link", d3.forceLink<SimulationNode, SimulationEdge>(edges)
         .id(d => d.id)
         .distance(d => {
-          // Longer distances for high-cardinality nodes
-          const sourceConnections = graph.connections.get((d.source as SimulationNode).id)?.size || 0;
-          const targetConnections = graph.connections.get((d.target as SimulationNode).id)?.size || 0;
+          const source = d.source as SimulationNode;
+          const target = d.target as SimulationNode;
+          
+          // Comfortable distance for author-post relationships - not too cramped!
+          if ((source.type === 'author' && target.type === 'post') || 
+              (source.type === 'post' && target.type === 'author')) {
+            return 80; // Back to comfortable spacing within clusters
+          }
+          
+          // Normal distance for tag relationships  
+          if (source.type === 'tags' || target.type === 'tags') {
+            return 100;
+          }
+          
+          // SHORTER distances for cross-cluster connections to bring clusters closer
+          const sourceConnections = graph.connections.get((source as SimulationNode).id)?.size || 0;
+          const targetConnections = graph.connections.get((target as SimulationNode).id)?.size || 0;
           const maxConnections = Math.max(sourceConnections, targetConnections);
 
-          // Very long distances for hub nodes (low cardinality, high connections)
+          // Reduced distances for hub nodes to compress overall graph
           if (maxConnections > 10) {
-            return 150 + (maxConnections * 8);
+            return 120 + (maxConnections * 5); // Much shorter than before (was 250 + 15)
           }
 
-          return 100 + (maxConnections * 5);
+          return 100 + (maxConnections * 3); // Much shorter than before (was 180 + 8)
         })
         .strength(d => {
-          // Weaker links for hub nodes
-          const sourceConnections = graph.connections.get((d.source as SimulationNode).id)?.size || 0;
-          const targetConnections = graph.connections.get((d.target as SimulationNode).id)?.size || 0;
+          const source = d.source as SimulationNode;
+          const target = d.target as SimulationNode;
+          
+          // ULTRA MAXIMUM strength for author-post bonds - iron grip!
+          if ((source.type === 'author' && target.type === 'post') || 
+              (source.type === 'post' && target.type === 'author')) {
+            return 2.0; // Maximum possible strength!
+          }
+          
+          // Stronger tag relationships too
+          if (source.type === 'tags' || target.type === 'tags') {
+            return 0.8;
+          }
+          
+          // Weak strength for date relationships (they tend to be hubs)
+          if (source.type === 'date' || target.type === 'date') {
+            return 0.1;
+          }
+          
+          // Weaker links for everything else
+          const sourceConnections = graph.connections.get((source as SimulationNode).id)?.size || 0;
+          const targetConnections = graph.connections.get((target as SimulationNode).id)?.size || 0;
           const maxConnections = Math.max(sourceConnections, targetConnections);
 
-          if (maxConnections > 10) return 0.2;
-          return 0.5;
+          if (maxConnections > 10) return 0.15;
+          return 0.3;
         })
       )
       .force("charge", d3.forceManyBody()
         .strength(d => {
-          // Low cardinality nodes = MUCH stronger repulsion
           const node = d as SimulationNode;
           const connectionCount = graph.connections.get(node.id)?.size || 0;
 
-          // Hub nodes push EVERYTHING away strongly
+          // Moderate author repulsion - let the custom authorSeparation force handle the spacing
+          if (node.type === 'author') {
+            return -500 - (connectionCount * 25); // Back to moderate strength
+          }
+
+          // Keep reduced repulsion for posts within clusters
           if (connectionCount > 15) {
-            return -1000 - (connectionCount * 100);
+            return -400 - (connectionCount * 40);
           }
           if (connectionCount > 10) {
-            return -600 - (connectionCount * 80);
+            return -250 - (connectionCount * 30);
           }
 
-          return -300 - (connectionCount * 30);
+          return -150 - (connectionCount * 10); // Even weaker to keep things tighter
         })
-        .distanceMax(800)
+        .distanceMax(600) // Back to smaller distance for tighter overall graph
       )
-      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.03))
+      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.02))
+      .force("authorAttraction", (alpha) => {
+        // Very strong custom force to pull posts super tight to their authors
+        nodes.forEach(node => {
+          if (node.type === 'post') {
+            const authorId = postToAuthor.get(node.id);
+            if (authorId) {
+              const author = nodes.find(n => n.id === authorId);
+              if (author && author.x !== undefined && author.y !== undefined && 
+                  node.x !== undefined && node.y !== undefined) {
+                const dx = author.x - node.x;
+                const dy = author.y - node.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 0) {
+                  // Moderate clustering force - comfortable but grouped
+                  const strength = 0.3 * alpha; // Back to moderate strength
+                  const force = strength * distance / 500; // Gentler scaling
+                  
+                  node.vx = (node.vx || 0) + dx * force;
+                  node.vy = (node.vy || 0) + dy * force;
+                  
+                  // Small counter-force for natural movement
+                  author.vx = (author.vx || 0) - dx * force * 0.1;
+                  author.vy = (author.vy || 0) - dy * force * 0.1;
+                }
+              }
+            }
+          }
+        });
+      })
+      .force("authorSeparation", (alpha) => {
+        // Strong separation - push author clusters well apart
+        const authorNodes = nodes.filter(n => n.type === 'author');
+        for (let i = 0; i < authorNodes.length; i++) {
+          for (let j = i + 1; j < authorNodes.length; j++) {
+            const authorA = authorNodes[i];
+            const authorB = authorNodes[j];
+            
+            if (authorA.x !== undefined && authorA.y !== undefined &&
+                authorB.x !== undefined && authorB.y !== undefined) {
+              const dx = authorB.x - authorA.x;
+              const dy = authorB.y - authorA.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (distance > 0 && distance < 250) { // Increased from 150 - repel when closer than 250px
+                const strength = 0.3 * alpha; // Much stronger separation (was 0.1)
+                const force = strength / (distance * distance) * 15000; // Much stronger force (was 5000)
+                
+                authorA.vx = (authorA.vx || 0) - dx * force;
+                authorA.vy = (authorA.vy || 0) - dy * force;
+                authorB.vx = (authorB.vx || 0) + dx * force;
+                authorB.vy = (authorB.vy || 0) + dy * force;
+              }
+            }
+          }
+        }
+      })
+      .force("authorCentering", (alpha) => {
+        // Keep authors at the center of their post clusters
+        nodes.forEach(author => {
+          if (author.type === 'author' && author.x !== undefined && author.y !== undefined) {
+            // Find all posts connected to this author
+            const authorPosts = nodes.filter(node => 
+              node.type === 'post' && postToAuthor.get(node.id) === author.id
+            );
+            
+            if (authorPosts.length > 0) {
+              // Calculate centroid of all connected posts
+              let centerX = 0;
+              let centerY = 0;
+              let validPosts = 0;
+              
+              authorPosts.forEach(post => {
+                if (post.x !== undefined && post.y !== undefined) {
+                  centerX += post.x;
+                  centerY += post.y;
+                  validPosts++;
+                }
+              });
+              
+              if (validPosts > 0) {
+                centerX /= validPosts;
+                centerY /= validPosts;
+                
+                // Pull author toward the centroid of their posts
+                const dx = centerX - author.x;
+                const dy = centerY - author.y;
+                const strength = 0.2 * alpha; // Moderate centering strength
+                
+                author.vx = (author.vx || 0) + dx * strength;
+                author.vy = (author.vy || 0) + dy * strength;
+              }
+            }
+          }
+        });
+      })
       .force("collision", d3.forceCollide<SimulationNode>().radius(d => {
-        // Calculate radius based on actual connection count (cardinality)
+        // Normal collision bubbles for comfortable spacing within clusters
         const connectionCount = graph.connections.get(d.id)?.size || 0;
-
-        // Base radius varies by type
-        const baseRadius = d.type === 'post' ? 70 : 60;
-
-        // Larger collision bubbles for hub nodes
-        const scaleFactor = connectionCount > 10 ? 5 : 3;
-
+        const baseRadius = d.type === 'post' ? 60 : 55; // Back to comfortable size
+        const scaleFactor = connectionCount > 10 ? 3 : 2; // Normal scaling
         return baseRadius + (connectionCount * scaleFactor);
-      }).strength(0.9));
+      }).strength(0.8));
 
     simulationRef.current = simulation;
 
@@ -293,17 +437,72 @@ function ForceGraphComponent({ graph, selectedNodes, onNodeClick, width, height 
   }, [graph, onNodeClick, width, height]);
 
   return (
-    <svg
-      ref={svgRef}
-      width={width}
-      height={height}
-      style={{
-        background: 'hsl(var(--background))',
-        display: 'block',
-        width: '100%',
-        height: '100%'
-      }}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <svg
+        ref={svgRef}
+        width={width}
+        height={height}
+        style={{
+          background: 'hsl(var(--background))',
+          display: 'block',
+          width: '100%',
+          height: '100%'
+        }}
+      />
+      
+      {/* Legend Card */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '8px',
+          padding: '12px',
+          fontSize: '11px',
+          fontFamily: 'monospace',
+          color: 'hsl(var(--foreground))',
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.3)',
+          minWidth: '140px',
+          zIndex: 10
+        }}
+      >
+        <div style={{ 
+          fontWeight: '600', 
+          marginBottom: '8px',
+          color: 'white'
+        }}>
+          Link Types
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <hr style={{ 
+              width: '24px', 
+              height: '3px', 
+              backgroundColor: '#8ec07c',
+              border: 'none',
+              margin: 0
+            }} />
+            <span style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Authors</span>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <hr style={{ 
+              width: '24px', 
+              height: '0px', 
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderTop: '3px dashed #83a598',
+              margin: 0
+            }} />
+            <span style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Tags</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

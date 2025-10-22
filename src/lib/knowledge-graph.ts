@@ -92,7 +92,7 @@ export function buildKnowledgeGraph(posts: ExtendedPost[]): KnowledgeGraph {
   };
 
   // Fields to skip (internal metadata, not useful for graph)
-  const skipFields = new Set(['_id', '_raw', 'body', 'slug', 'title', 'description']);
+  const skipFields = new Set(['_id', '_raw', 'body', 'slug', 'title', 'description', 'external', 'corporate', 'readingTime', 'date', 'spotifyTrack']);
 
   // Track node counts: Map<nodeId, count>
   const nodeCounts = new Map<string, number>();
@@ -118,9 +118,16 @@ export function buildKnowledgeGraph(posts: ExtendedPost[]): KnowledgeGraph {
       // Handle array fields (authors, tags, etc.)
       if (Array.isArray(fieldValue)) {
         fieldValue.forEach((item) => {
-          const normalized = typeof item === 'string' ? item.toLowerCase() : normalizeValue(item);
+          let normalized = typeof item === 'string' ? item.toLowerCase() : normalizeValue(item);
+          let label = typeof item === 'string' ? item : normalizeValue(item);
+          
+          // Special handling for authors field: if post is corporate, use "corporate" as author
+          if (fieldName === 'authors' && post.corporate) {
+            normalized = 'corporate';
+            label = 'Corporate';
+          }
+          
           const nodeId = `${fieldName}-${normalized}`;
-          const label = typeof item === 'string' ? item : normalizeValue(item);
 
           // Count occurrences
           nodeCounts.set(nodeId, (nodeCounts.get(nodeId) || 0) + 1);
