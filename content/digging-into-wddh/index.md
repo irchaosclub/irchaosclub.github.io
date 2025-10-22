@@ -1,6 +1,6 @@
 ---
 title: "Digging into Windows Defender Detection History (WDDH)"
-date: 2025-10-28
+date: 2025-10-18
 authors: ["cyberdefense"]
 tags: ["windows", "forensics", "tools"]
 description: "Reverse engineering Windows Defender Detection History (WDDH) files to understand their binary structure and develop a Python parsing tool. Covers methodology from identifying data sources in MsMpEng.exe to creating a standalone CLI parser for DFIR investigations."

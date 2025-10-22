@@ -45,11 +45,11 @@ With that in mind, I'm going to keep focus on the "what's old is new" theme by a
 
 With the multiple references to `G DATA`, `AVKTray`, and `G DATA Security Software - Tray Application`, this appears to be impersonating legitimate security software:
 
-![OriginalFilename](/public/images/darkgate-3-return-of-the-temp/originalfilename.png)
+![OriginalFilename](/images/darkgate-3-return-of-the-temp/originalfilename.png)
 
 Additionally, I see a familiar file extension, `a3x`:
 
-![a3x](/public/images/darkgate-3-return-of-the-temp/diss-a3x.png)
+![a3x](/images/darkgate-3-return-of-the-temp/diss-a3x.png)
 
 With any sample of Darkgate, I expect to see multiple files and directories written to disk, so I pay particular attention to the `WriteFile` Windows API. Unfortunately, I wasn't able to glean much from the code references. 
 
@@ -57,22 +57,22 @@ With any sample of Darkgate, I expect to see multiple files and directories writ
 
 Upon execution, Darkgate will attempt to connect to the domain `todayput[.]shop`:
 
-![DNSrequest](/public/images/darkgate-3-return-of-the-temp/dnsrequest.png)
+![DNSrequest](/images/darkgate-3-return-of-the-temp/dnsrequest.png)
 
 There is also a new directory created at `c:\temp\test` that confirms the `a3x` string seen in disassembly, in addition to the AutoIt3 executable:
 
-![a3x](/public/images/darkgate-3-return-of-the-temp/autoitexe.png)
+![a3x](/images/darkgate-3-return-of-the-temp/autoitexe.png)
 
 In the process tree, this `Autoit3.exe` file will load the script.a3x with the command:
 ``` "c:\temp\test\Autoit3.exe" c:\temp\test\script.a3x ```
 
 Additionally, attempting to execute this script manually will not work, judging by the (on the nose) dialogue box:
 
-![Failed Execution](/public/images/darkgate-3-return-of-the-temp/failedautoitexecution.png)
+![Failed Execution](/images/darkgate-3-return-of-the-temp/failedautoitexecution.png)
 
 I use myAut2Exe to analyze the `script.a3x` file:
 
-![scripta3x](/public/images/darkgate-3-return-of-the-temp/scripta3x.png)
+![scripta3x](/images/darkgate-3-return-of-the-temp/scripta3x.png)
 
 ```
 GUICreate("cfrygtvwk", 815, 365)
@@ -118,7 +118,7 @@ Just because, I wrote a simple script to decrypt XOR + NOT ciphers and saves the
 
 Using this script, the decrypted strings are: 
 
-![Decrypted](/public/images/darkgate-3-return-of-the-temp/decryptedblobs.png)
+![Decrypted](/images/darkgate-3-return-of-the-temp/decryptedblobs.png)
 ```
 [
   {
@@ -156,7 +156,7 @@ I go to this directory and get the hashes of the files. Again, `Autoit3.exe` is 
 
 Also notable is that `script.a3x` will enumerate the system for installed security software, ironically also including G DATA:
 
-![Enumeration](/public/images/darkgate-3-return-of-the-temp/enum-security.png)
+![Enumeration](/images/darkgate-3-return-of-the-temp/enum-security.png)
 
 ## Tactics, Techniques, and Procedures (TTPs)
 ### Execution
