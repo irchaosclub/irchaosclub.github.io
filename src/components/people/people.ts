@@ -37,4 +37,13 @@ export const PEOPLE: Person[] = [
       twitter: "https://x.com/deceptiq_"
     },
   },
+  {
+    name: "dingusxmcgee",
+    role: "Incident Responder",
+    bio: "Engineer and Incident Responder who dabbled in analyzing malware and reverse engineering",
+    links: {
+      website: "https://blog.dingusxmcgee.com",
+      mastodon: "https://infosec.exchange/@dingusxmcgee"
+    },
+  }
 ];
