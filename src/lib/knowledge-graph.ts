@@ -37,8 +37,8 @@ export function buildKnowledgeGraph(posts: ExtendedPost[]): KnowledgeGraph {
   nodesByType.set('post', new Set());
   nodesByType.set('tag', new Set());
 
-  // Filter out corporate posts
-  const filteredPosts = posts.filter((p) => !p.corporate);
+  // Filter out corporate internal posts (keep external posts even if corporate)
+  const filteredPosts = posts.filter((p) => !p.corporate || p.external);
 
   // Helper to add a node
   const addNode = (node: GraphNode) => {
@@ -111,7 +111,7 @@ export function buildKnowledgeGraph(posts: ExtendedPost[]): KnowledgeGraph {
       metadata: {
         slug: post.slug,
         date: post.date,
-        external: post.external || false,
+        external: post.external,
       },
     });
 
