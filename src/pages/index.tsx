@@ -85,7 +85,7 @@ function TitleCell({
           href={external}
           className="hover:text-primary underline inline-flex items-center gap-1 min-w-0 font-medium"
         >
-          <Globe className="h-4 w-4 flex-none shrink-0 text-muted-foreground" />
+          <Globe className="h-4 w-4 flex-none shrink-0 text-blue-500" />
           <span ref={spanRef} className="break-words whitespace-normal">
             {title}
           </span>
@@ -130,8 +130,10 @@ function MobilePosts({
         return (
           <button
             key={p.slug}
-            className={`w-full text-left rounded-md border border-border p-3 hover:bg-muted-10 transition ${
-              ext ? "bg-card/60" : "bg-card/80 internal-post-mobile"
+            className={`w-full text-left rounded-md border p-3 transition-colors ${
+              ext
+                ? "bg-card/60 border-blue-500/50 hover:bg-blue-500/10 hover:border-blue-500"
+                : "bg-card/80 internal-post-mobile border-border hover:bg-muted/20"
             }`}
             onClick={() => onCardClick(p)}
           >
@@ -147,7 +149,7 @@ function MobilePosts({
 
             <div className="mt-1 font-medium underline break-words whitespace-normal flex items-center gap-1">
               {ext ? (
-                <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <Globe className="h-4 w-4 shrink-0 text-blue-500" />
               ) : (
                 <House className="h-4 w-4 shrink-0 text-primary" />
               )}
@@ -1011,9 +1013,13 @@ export default function Home({ posts }: Props) {
                         return (
                           <TableRow
                             key={p.slug}
-                            className={`${isSel ? "bg-muted-40" : ""} ${
-                              !ext ? "internal-post" : ""
-                            } cursor-pointer`}
+                            className={`cursor-pointer transition-colors ${
+                              isSel
+                                ? "bg-muted/40"
+                                : ext
+                                ? "hover:bg-blue-500/10 border-l-2 border-l-blue-500/50"
+                                : "hover:bg-muted/20"
+                            } ${!ext ? "internal-post" : ""}`}
                             onClick={() => setSelected(p.slug)}
                             onDoubleClick={() =>
                               (window.location.href = ext ? ext : `/${p.slug}/`)

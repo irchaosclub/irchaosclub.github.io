@@ -36,9 +36,15 @@ export function PostAreaInteractive({
   const [selectionStart, setSelectionStart] = React.useState<string | null>(null);
   const [selectionEnd, setSelectionEnd] = React.useState<string | null>(null);
   const [isSelecting, setIsSelecting] = React.useState(false);
+  const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     setIsMounted(true);
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
   }, []);
 
   const handleMouseDown = (e: any) => {
@@ -69,7 +75,14 @@ export function PostAreaInteractive({
           end: data[maxIdx].end,
         };
 
-        onRangeSelect?.(range);
+        // Delay the range selection to allow double-click to cancel it
+        if (clickTimeoutRef.current) {
+          clearTimeout(clickTimeoutRef.current);
+        }
+        clickTimeoutRef.current = setTimeout(() => {
+          onRangeSelect?.(range);
+          clickTimeoutRef.current = null;
+        }, 250);
       }
     }
     setIsSelecting(false);
@@ -78,6 +91,11 @@ export function PostAreaInteractive({
   };
 
   const handleDoubleClick = () => {
+    // Cancel any pending single-click range selection
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+    }
     // Double click to clear selection
     onRangeSelect?.(null);
   };
