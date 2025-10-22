@@ -7,8 +7,7 @@ import { KnowledgeGraph, GraphNode, GraphEdge } from "@/lib/knowledge-graph";
 
 type ForceGraphProps = {
   graph: KnowledgeGraph;
-  selectedAuthors?: Set<string>;
-  selectedTags?: Set<string>;
+  selectedNodes?: Set<string>; // Selected node IDs
   onNodeClick?: (node: GraphNode) => void;
   width: number;
   height: number;
@@ -27,7 +26,7 @@ type SimulationEdge = {
   relationship: GraphEdge['relationship'];
 };
 
-function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick, width, height }: ForceGraphProps) {
+function ForceGraphComponent({ graph, selectedNodes, onNodeClick, width, height }: ForceGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const simulationRef = useRef<d3.Simulation<SimulationNode, SimulationEdge> | null>(null);
 
@@ -79,17 +78,60 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
     const simulation = d3.forceSimulation<SimulationNode>(nodes)
       .force("link", d3.forceLink<SimulationNode, SimulationEdge>(edges)
         .id(d => d.id)
-        .distance(d => d.relationship === 'authored' ? 120 : 140)
-        .strength(0.6)
+        .distance(d => {
+          // Longer distances for high-cardinality nodes
+          const sourceConnections = graph.connections.get((d.source as SimulationNode).id)?.size || 0;
+          const targetConnections = graph.connections.get((d.target as SimulationNode).id)?.size || 0;
+          const maxConnections = Math.max(sourceConnections, targetConnections);
+
+          // Very long distances for hub nodes (low cardinality, high connections)
+          if (maxConnections > 10) {
+            return 150 + (maxConnections * 8);
+          }
+
+          return 100 + (maxConnections * 5);
+        })
+        .strength(d => {
+          // Weaker links for hub nodes
+          const sourceConnections = graph.connections.get((d.source as SimulationNode).id)?.size || 0;
+          const targetConnections = graph.connections.get((d.target as SimulationNode).id)?.size || 0;
+          const maxConnections = Math.max(sourceConnections, targetConnections);
+
+          if (maxConnections > 10) return 0.2;
+          return 0.5;
+        })
       )
       .force("charge", d3.forceManyBody()
-        .strength(-400)
-        .distanceMax(300)
+        .strength(d => {
+          // Low cardinality nodes = MUCH stronger repulsion
+          const node = d as SimulationNode;
+          const connectionCount = graph.connections.get(node.id)?.size || 0;
+
+          // Hub nodes push EVERYTHING away strongly
+          if (connectionCount > 15) {
+            return -1000 - (connectionCount * 100);
+          }
+          if (connectionCount > 10) {
+            return -600 - (connectionCount * 80);
+          }
+
+          return -300 - (connectionCount * 30);
+        })
+        .distanceMax(800)
       )
-      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05))
+      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.03))
       .force("collision", d3.forceCollide<SimulationNode>().radius(d => {
-        return d.type === 'post' ? 90 : 70;
-      }).strength(1));
+        // Calculate radius based on actual connection count (cardinality)
+        const connectionCount = graph.connections.get(d.id)?.size || 0;
+
+        // Base radius varies by type
+        const baseRadius = d.type === 'post' ? 70 : 60;
+
+        // Larger collision bubbles for hub nodes
+        const scaleFactor = connectionCount > 10 ? 5 : 3;
+
+        return baseRadius + (connectionCount * scaleFactor);
+      }).strength(0.9));
 
     simulationRef.current = simulation;
 
@@ -108,14 +150,31 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
     const foregroundColor = getColor('foreground');
     const mutedForegroundColor = getColor('muted-foreground');
 
+    // Color map for different relationship types
+    const relationshipColors: Record<string, string> = {
+      'authors': primaryColor,
+      'tags': accentColor,
+      'date': mutedForegroundColor,
+      'readingTime': '#8b5cf6', // purple
+      'external': '#3b82f6', // blue
+      'corporate': '#f59e0b', // amber
+      'spotifyTrack': '#22c55e', // green
+    };
+
     const link = container.append("g")
       .selectAll("line")
       .data(edges)
       .join("line")
-      .attr("stroke", d => d.relationship === 'authored' ? primaryColor : accentColor)
+      .attr("stroke", d => relationshipColors[d.relationship] || mutedForegroundColor)
       .attr("stroke-width", 2)
-      .attr("stroke-opacity", 0.6)
-      .attr("stroke-dasharray", d => d.relationship === 'tagged' ? "5,5" : "none");
+      .attr("stroke-opacity", 0.5)
+      .attr("stroke-dasharray", d => {
+        // Different dash patterns for different relationships
+        if (d.relationship === 'tags') return "5,5";
+        if (d.relationship === 'date') return "2,3";
+        if (d.relationship === 'spotifyTrack') return "8,4";
+        return "none";
+      });
 
     const node = container.append("g")
       .selectAll("g")
@@ -144,9 +203,7 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
       })
       .style("cursor", "pointer");
     const isSelected = (d: SimulationNode) => {
-      if (d.type === 'author') return selectedAuthors?.has(d.label);
-      if (d.type === 'tag') return selectedTags?.has(d.label);
-      return false;
+      return selectedNodes?.has(d.id) || false;
     };
 
     node.append("rect")
@@ -171,7 +228,7 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
       .attr("rx", 4)
       .style("filter", d => isSelected(d) ? "brightness(1.2)" : "none");
 
-    // Node type indicator
+    // Node type indicator (dynamic)
     node.append("text")
       .attr("x", d => {
         const baseWidth = d.type === 'post' ? 140 : 100;
@@ -181,16 +238,12 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
       .attr("font-family", "monospace")
       .attr("font-size", "9px")
       .attr("fill", d => {
-        if (d.type === 'author') return primaryColor;
-        if (d.type === 'tag') return accentColor;
+        if (d.type === 'authors') return primaryColor;
+        if (d.type === 'tags') return accentColor;
         return mutedForegroundColor;
       })
       .attr("text-anchor", "start")
-      .text(d => {
-        if (d.type === 'author') return "[AUTHOR]";
-        if (d.type === 'tag') return "[TAG]";
-        return "[POST]";
-      });
+      .text(d => `[${d.type.toUpperCase()}]`);
 
     node.append("text")
       .attr("x", 0)
