@@ -83,7 +83,7 @@ function TitleCell({
       {external ? (
         <a
           href={external}
-          className="hover:text-primary underline inline-flex items-center gap-1 min-w-0 font-medium"
+          className="hover:text-primary inline-flex items-center gap-1 min-w-0 font-medium"
         >
           <Globe className="h-4 w-4 flex-none shrink-0 text-blue-500" />
           <span ref={spanRef} className="break-words whitespace-normal">
@@ -93,10 +93,10 @@ function TitleCell({
       ) : (
         <Link
           href={`/${slug}/`}
-          className="hover:text-primary underline inline-flex items-center gap-1 min-w-0 font-medium"
+          className="hover:text-primary underline inline-flex items-center gap-1 min-w-0 font-semibold"
         >
           <House className="h-4 w-4 flex-none shrink-0 text-primary" />
-          <span ref={spanRef} className="break-words whitespace-normal">
+          <span ref={spanRef} className="break-words whitespace-normal font-semibold">
             {title}
           </span>
         </Link>
@@ -882,7 +882,7 @@ export default function Home({ posts }: Props) {
                               {type === "internal" ? (
                                 <House className="h-3.5 w-3.5 text-primary" />
                               ) : (
-                                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                                <Globe className="h-3.5 w-3.5 text-blue-500" />
                               )}
                               <span
                                 className={`text-sm capitalize ${
@@ -1067,19 +1067,28 @@ export default function Home({ posts }: Props) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {fullyFiltered.map((p) => {
+                      {fullyFiltered.map((p, index) => {
                         const isSel = p.slug === selectedPost?.slug;
                         const ext = p.external;
+
+
+                        
                         return (
                           <TableRow
                             key={p.slug}
                             className={`cursor-pointer transition-colors ${
                               isSel
                                 ? "bg-muted/40"
-                                : ext
-                                ? "hover:bg-blue-500/10 border-l-2 border-l-blue-500/50"
-                                : "hover:bg-muted/20"
-                            } ${!ext ? "internal-post" : ""}`}
+                                : ""
+                            } ${
+                              !isSel && ext
+                                ? "hover:bg-blue-500/10"
+                                : ""
+                            } ${
+                              !isSel && !ext
+                                ? "hover:bg-green-500/10"
+                                : ""
+                            }`}
                             onClick={() => setSelected(p.slug)}
                             onDoubleClick={() =>
                               (window.location.href = ext ? ext : `/${p.slug}/`)

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { User, Tag, Filter, X, ExternalLink, House, Globe } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ForceGraph } from "@/components/graph/ForceGraph";
+import ThemePicker from "@/components/theme/ThemePicker";
 import {
   Dialog,
   DialogContent,
@@ -139,7 +140,17 @@ export default function GraphPage({ posts }: Props) {
               [{stats.totalNodes} nodes] [{stats.edgeCount} edges] [{stats.postCount} posts]
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <Link href="/">
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-mono gap-2"
+              >
+                <House className="h-4 w-4" />
+                [HOME]
+              </Button>
+            </Link>
             {selectedNodes.size > 0 && (
               <Button
                 onClick={resetSelection}
@@ -160,6 +171,7 @@ export default function GraphPage({ posts }: Props) {
               <Filter className="h-4 w-4" />
               {showFilters ? "[HIDE FILTERS]" : "[FILTERS]"}
             </Button>
+            <ThemePicker />
           </div>
         </div>
 

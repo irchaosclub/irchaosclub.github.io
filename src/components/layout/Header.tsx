@@ -28,7 +28,7 @@ export default function Header() {
             <Link href="/about" className="hover:underline">
               About
             </Link>
-            <Link href="/graph" className="hover:underline">
+            <Link href="/graph" className="hover:underline hidden md:inline">
               Graph
             </Link>
             <a

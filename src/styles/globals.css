@@ -1158,3 +1158,30 @@
     ) !important;
     border-left: 3px solid hsl(var(--primary) / 0.4);
 }
+
+/* Fix border visibility on first and last table rows */
+.posts-container .posts-table tbody tr:first-child {
+    border-top-left-radius: calc(var(--radius) - 1px);
+}
+
+.posts-container .posts-table tbody tr:first-child td:first-child {
+    border-top-left-radius: calc(var(--radius) - 1px);
+}
+
+.posts-container .posts-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: calc(var(--radius) - 1px);
+}
+
+/* Ensure table borders are not clipped by container overflow */
+.posts-container .posts-table {
+    overflow: visible;
+}
+
+/* Fix border visibility issues on first and last rows */
+.posts-container .posts-table tbody tr:first-child td:first-child {
+    border-top-left-radius: 0;
+}
+
+.posts-container .posts-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 0;
+}

@@ -49,6 +49,10 @@ export function PostAreaInteractive({
 
   const handleMouseDown = (e: any) => {
     if (e && e.activeLabel) {
+      // Prevent text selection
+      if (e.nativeEvent) {
+        e.nativeEvent.preventDefault();
+      }
       setIsSelecting(true);
       setSelectionStart(e.activeLabel);
       setSelectionEnd(e.activeLabel);
@@ -57,6 +61,10 @@ export function PostAreaInteractive({
 
   const handleMouseMove = (e: any) => {
     if (isSelecting && e && e.activeLabel) {
+      // Prevent text selection during drag
+      if (e.nativeEvent) {
+        e.nativeEvent.preventDefault();
+      }
       setSelectionEnd(e.activeLabel);
     }
   };
@@ -111,11 +119,34 @@ export function PostAreaInteractive({
   let refAreaRight: string | undefined;
 
   if (selectedRange) {
-    const startBin = data.find((d) => d.end >= selectedRange.start);
+    // Find bins that overlap with the selected range
+    const startBin = data.find((d) => d.start <= selectedRange.start && d.end >= selectedRange.start);
     const endBin = data.find((d) => d.start <= selectedRange.end && d.end >= selectedRange.end);
-    if (startBin) refAreaLeft = startBin.label;
-    if (endBin) refAreaRight = endBin.label;
-  } else if (isSelecting && selectionStart && selectionEnd) {
+    
+    // Fallback to closest bins if exact overlap not found
+    if (!startBin) {
+      const closestStart = data.reduce((closest, bin) => 
+        Math.abs(bin.start.getTime() - selectedRange.start.getTime()) < 
+        Math.abs(closest.start.getTime() - selectedRange.start.getTime()) ? bin : closest
+      );
+      refAreaLeft = closestStart.label;
+    } else {
+      refAreaLeft = startBin.label;
+    }
+    
+    if (!endBin) {
+      const closestEnd = data.reduce((closest, bin) => 
+        Math.abs(bin.end.getTime() - selectedRange.end.getTime()) < 
+        Math.abs(closest.end.getTime() - selectedRange.end.getTime()) ? bin : closest
+      );
+      refAreaRight = closestEnd.label;
+    } else {
+      refAreaRight = endBin.label;
+    }
+  }
+  
+  // Show live preview while selecting
+  if (isSelecting && selectionStart && selectionEnd) {
     const startIdx = data.findIndex((d) => d.label === selectionStart);
     const endIdx = data.findIndex((d) => d.label === selectionEnd);
     if (startIdx !== -1 && endIdx !== -1) {
@@ -125,7 +156,13 @@ export function PostAreaInteractive({
   }
 
   return (
-    <div className="relative">
+    <div 
+      className="relative select-none" 
+      style={{ 
+        userSelect: 'none', 
+        WebkitUserSelect: 'none'
+      }}
+    >
       {selectedRange && (
         <div className="absolute top-0 right-0 z-10">
           <button
@@ -138,8 +175,9 @@ export function PostAreaInteractive({
         </div>
       )}
       <ChartContainer
-        className="w-full h-[180px] min-h-[180px] cursor-crosshair"
+        className="w-full h-[180px] min-h-[180px] cursor-crosshair focus:outline-none select-none [&_svg]:outline-none [&_*]:outline-none"
         config={{ accent: "var(--primary)" }}
+        style={{ outline: 'none' }}
       >
         <ResponsiveContainer width="100%" height={180} minHeight={180}>
           <AreaChart
@@ -149,6 +187,7 @@ export function PostAreaInteractive({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onDoubleClick={handleDoubleClick}
+            style={{ outline: 'none' }}
           >
             <CartesianGrid
               stroke="var(--border)"
@@ -175,9 +214,11 @@ export function PostAreaInteractive({
               <ReferenceArea
                 x1={refAreaLeft}
                 x2={refAreaRight}
-                strokeOpacity={0.3}
+                strokeOpacity={isSelecting ? 0.6 : 0.3}
                 fill="var(--primary)"
-                fillOpacity={0.2}
+                fillOpacity={isSelecting ? 0.35 : 0.2}
+                stroke="var(--primary)"
+                strokeWidth={isSelecting ? 1 : 0}
               />
             )}
             <Area
