@@ -1,7 +1,7 @@
  --- 
  title: "Darkgate 3: Return of the Temp" 
  date: 2025-10-21
- authors: ["grepStrength"] 
+ authors: ["grepstrength"] 
  tags: ["REM", "malware analysis", "darkgate", "loader", "autoit"] 
  description: "Analyzing the prolific malware loader that loves AutoIt." 
  readingTime: 8 
@@ -254,7 +254,8 @@ Or:
 
 - Regex Generator: https://regex-generator.olafneumann.org/?sampleText=&flags=i
 
+
 ---
 
+
 fmt.Println(“Thanks for reading! If you enjoyed this article, [please buy me a coffee](https://buymeacoffee.com/grepstrength)!”)
-![Coffee](/public/images/darkgate-3-return-of-the-temp/coffee.gif)
