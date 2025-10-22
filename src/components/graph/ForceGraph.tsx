@@ -274,4 +274,4 @@ function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick
   );
 }
 
-export const ForceGraph = ForceGraphComponent;
+export const ForceGraph = memo(ForceGraphComponent);

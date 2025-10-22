@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { allPosts } from "contentlayer/generated";
 import { ExtendedPost } from "@/types/post";
 import { SEO } from "@/components/seo/SEO";
@@ -66,7 +66,7 @@ export default function GraphPage({ posts }: Props) {
 
   const stats = getGraphStats(filteredGraph);
 
-  const handleNodeClick = (node: GraphNode) => {
+  const handleNodeClick = useCallback((node: GraphNode) => {
     if (node.type === "author") {
       setSelectedAuthors((prev) => {
         const next = new Set(prev);
@@ -95,7 +95,7 @@ export default function GraphPage({ posts }: Props) {
         window.location.href = url;
       }
     }
-  };
+  }, []);
 
   const resetSelection = () => {
     setSelectedAuthors(new Set());
