@@ -7,6 +7,8 @@ import { KnowledgeGraph, GraphNode, GraphEdge } from "@/lib/knowledge-graph";
 
 type ForceGraphProps = {
   graph: KnowledgeGraph;
+  selectedAuthors?: Set<string>;
+  selectedTags?: Set<string>;
   onNodeClick?: (node: GraphNode) => void;
   width: number;
   height: number;
@@ -25,7 +27,7 @@ type SimulationEdge = {
   relationship: GraphEdge['relationship'];
 };
 
-function ForceGraphComponent({ graph, onNodeClick, width, height }: ForceGraphProps) {
+function ForceGraphComponent({ graph, selectedAuthors, selectedTags, onNodeClick, width, height }: ForceGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const simulationRef = useRef<d3.Simulation<SimulationNode, SimulationEdge> | null>(null);
 
@@ -119,6 +121,12 @@ function ForceGraphComponent({ graph, onNodeClick, width, height }: ForceGraphPr
         onNodeClick?.(d);
       })
       .style("cursor", "pointer");
+    const isSelected = (d: SimulationNode) => {
+      if (d.type === 'author') return selectedAuthors?.has(d.label);
+      if (d.type === 'tag') return selectedTags?.has(d.label);
+      return false;
+    };
+
     node.append("rect")
       .attr("width", d => {
         const baseWidth = d.type === 'post' ? 140 : 100;
@@ -136,8 +144,10 @@ function ForceGraphComponent({ graph, onNodeClick, width, height }: ForceGraphPr
         if (d.type === 'tag') return accentColor;
         return mutedForegroundColor;
       })
-      .attr("stroke-width", 2)
-      .attr("rx", 4);
+      .attr("stroke-width", d => isSelected(d) ? 3 : 2)
+      .attr("stroke-opacity", d => isSelected(d) ? 1 : 0.7)
+      .attr("rx", 4)
+      .style("filter", d => isSelected(d) ? "brightness(1.2)" : "none");
 
     // Node type indicator
     node.append("text")

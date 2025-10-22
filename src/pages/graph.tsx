@@ -153,6 +153,8 @@ export default function GraphPage({ posts }: Props) {
         <div className="flex-1 bg-muted relative overflow-hidden">
           <ForceGraph
             graph={filteredGraph}
+            selectedAuthors={selectedAuthors}
+            selectedTags={selectedTags}
             onNodeClick={handleNodeClick}
             width={dimensions.width}
             height={dimensions.height}
