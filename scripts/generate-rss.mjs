@@ -2,7 +2,6 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://irchaos.club";
 const SITE_TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "irchaos.club";
@@ -36,21 +35,23 @@ const categoryTags = (p) =>
     .join("");
 
 // --- load contentlayer output (must run after `contentlayer build`) ---
-const generatedPath = path.join(
+const postsJsonPath = path.join(
   process.cwd(),
   ".contentlayer",
   "generated",
-  "index.mjs"
+  "Post",
+  "_index.json"
 );
 try {
-  await fs.access(generatedPath);
+  await fs.access(postsJsonPath);
 } catch {
   console.error(
     "[generate-rss] Contentlayer output missing. Run `contentlayer build` (part of your `npm run build`)."
   );
   process.exit(1);
 }
-const { allPosts } = await import(pathToFileURL(generatedPath).href);
+const postsJson = await fs.readFile(postsJsonPath, "utf8");
+const allPosts = JSON.parse(postsJson);
 
 // --- build feed ---
 let posts = [...allPosts].sort(
