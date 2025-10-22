@@ -26,7 +26,7 @@ import {
   PostAreaInteractive,
   Bin,
 } from "@/components/charts/PostAreaInteractive";
-import { parseQuery, matchesQuery } from "@/lib/search";
+import { parseQuery, matchesQuery, toggleFilter, addFilter, removeFilter, formatDateForQuery } from "@/lib/search";
 import {
   ExternalLink,
   Search,
@@ -211,6 +211,26 @@ function countValues(values: string[] | undefined): Counts {
   return out;
 }
 
+// Normalize author names (case-insensitive, trim whitespace) and preserve first occurrence casing
+function countAuthors(values: string[] | undefined): Counts {
+  const out: Counts = {};
+  const canonicalNames: Record<string, string> = {}; // lowercase -> display name
+
+  for (const v of values ?? []) {
+    const trimmed = v.trim();
+    const normalized = trimmed.toLowerCase();
+
+    // Store the first occurrence as the canonical display name
+    if (!canonicalNames[normalized]) {
+      canonicalNames[normalized] = trimmed;
+    }
+
+    const displayName = canonicalNames[normalized];
+    out[displayName] = (out[displayName] ?? 0) + 1;
+  }
+  return out;
+}
+
 export default function Home({ posts }: Props) {
   const router = useRouter();
   const [initialLoadDone, setInitialLoadDone] = useState(false);
@@ -343,16 +363,28 @@ export default function Home({ posts }: Props) {
 
     const { q, authors, tags, type, days } = router.query;
 
+    // Build query string from URL params if no explicit query is provided
+    let queryParts: string[] = [];
+
     if (q && typeof q === 'string') {
-      setQuery(q);
+      queryParts.push(q);
     }
+
     if (authors) {
       const authorList = typeof authors === 'string' ? authors.split(',') : authors;
       setAuthorFacet(new Set(authorList));
+      // Add to query string if not already in q param
+      if (!q) {
+        authorList.forEach(a => queryParts.push(`author:${a}`));
+      }
     }
     if (tags) {
       const tagList = typeof tags === 'string' ? tags.split(',') : tags;
       setTagFacet(new Set(tagList));
+      // Add to query string if not already in q param
+      if (!q) {
+        tagList.forEach(t => queryParts.push(`tag:${t}`));
+      }
     }
     if (type) {
       const typeList = typeof type === 'string' ? type.split(',') : type;
@@ -361,6 +393,11 @@ export default function Home({ posts }: Props) {
     if (days && typeof days === 'string') {
       const d = parseInt(days, 10);
       if (!isNaN(d)) setDaysFacet(d);
+    }
+
+    // Set the constructed query in the search box
+    if (queryParts.length > 0) {
+      setQuery(queryParts.join(' '));
     }
 
     setInitialLoadDone(true);
@@ -420,10 +457,10 @@ export default function Home({ posts }: Props) {
   const histogramSource = useMemo(() => {
     return filteredByQuery.filter((p) => {
       if (authorFacet.size) {
-        const pa = new Set<string>(p.authors ?? []);
+        const pa = new Set<string>((p.authors ?? []).map(a => a.trim().toLowerCase()));
         let ok = false;
         for (const a of authorFacet)
-          if (pa.has(a)) {
+          if (pa.has(a.trim().toLowerCase())) {
             ok = true;
             break;
           }
@@ -447,29 +484,6 @@ export default function Home({ posts }: Props) {
     });
   }, [filteredByQuery, authorFacet, tagFacet, typeFacet]);
 
-  // facet counts
-  const authorCounts = useMemo(
-    () =>
-      countValues(
-        filteredByQuery
-          .filter((p) => !p.corporate) // Exclude corporate posts from author facet
-          .flatMap((p) => p.authors ?? [])
-      ),
-    [filteredByQuery]
-  );
-  const tagCounts = useMemo(
-    () => countValues(filteredByQuery.flatMap((p) => p.tags ?? [])),
-    [filteredByQuery]
-  );
-  const typeCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const p of filteredByQuery) {
-      const type = getPostType(p);
-      counts[type] = (counts[type] ?? 0) + 1;
-    }
-    return counts;
-  }, [filteredByQuery]);
-
   // quick time facet
   const quickRange = useMemo(() => {
     if (!daysFacet) return null;
@@ -478,6 +492,41 @@ export default function Home({ posts }: Props) {
     start.setDate(end.getDate() - daysFacet + 1);
     return { start, end };
   }, [daysFacet]);
+
+  // Filter posts for facet computation: query + time, but NOT author/tag/type facets
+  // This ensures facets update when time range changes
+  const filteredForFacets = useMemo(() => {
+    return filteredByQuery.filter((p) => {
+      const d = new Date(p.date);
+      if (range && !(d >= range.start && d <= range.end)) return false;
+      if (quickRange && !(d >= quickRange.start && d <= quickRange.end))
+        return false;
+      return true;
+    });
+  }, [filteredByQuery, range, quickRange]);
+
+  // facet counts
+  const authorCounts = useMemo(
+    () =>
+      countAuthors(
+        filteredForFacets
+          .filter((p) => !p.corporate) // Exclude corporate posts from author facet
+          .flatMap((p) => p.authors ?? [])
+      ),
+    [filteredForFacets]
+  );
+  const tagCounts = useMemo(
+    () => countValues(filteredForFacets.flatMap((p) => p.tags ?? [])),
+    [filteredForFacets]
+  );
+  const typeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of filteredForFacets) {
+      const type = getPostType(p);
+      counts[type] = (counts[type] ?? 0) + 1;
+    }
+    return counts;
+  }, [filteredForFacets]);
 
   // apply all filters
   const fullyFiltered = useMemo(() => {
@@ -488,10 +537,10 @@ export default function Home({ posts }: Props) {
         return false;
 
       if (authorFacet.size) {
-        const pa = new Set<string>(p.authors ?? []);
+        const pa = new Set<string>((p.authors ?? []).map(a => a.trim().toLowerCase()));
         let ok = false;
         for (const a of authorFacet)
-          if (pa.has(a)) {
+          if (pa.has(a.trim().toLowerCase())) {
             ok = true;
             break;
           }
@@ -570,6 +619,66 @@ export default function Home({ posts }: Props) {
     setQuery((cur) => (cur ? `${cur} ${snippet}` : snippet));
   }
 
+  // Handle histogram range selection
+  function handleRangeSelect(newRange: { start: Date; end: Date } | null) {
+    setRange(newRange);
+    setDaysFacet(null); // Clear quick time buttons when range selected
+
+    // Update query string to include after:/before: dates
+    let updatedQuery = query;
+
+    // Remove existing after:/before: filters
+    updatedQuery = removeFilter(removeFilter(updatedQuery, 'after'), 'before');
+    updatedQuery = removeFilter(removeFilter(updatedQuery, 'since'), 'until');
+
+    // Add new date filters if range selected
+    if (newRange) {
+      updatedQuery = addFilter(updatedQuery, 'after', formatDateForQuery(newRange.start));
+      updatedQuery = addFilter(updatedQuery, 'before', formatDateForQuery(newRange.end));
+    }
+
+    setQuery(updatedQuery);
+  }
+
+  // Handle quick time buttons (Last 7d, 30d, 90d)
+  function handleQuickTime(days: number | null) {
+    if (daysFacet === days) {
+      // Toggle off if clicking the same button
+      setDaysFacet(null);
+      setRange(null);
+      // Remove date filters from query
+      let updatedQuery = query;
+      updatedQuery = removeFilter(removeFilter(updatedQuery, 'after'), 'before');
+      updatedQuery = removeFilter(removeFilter(updatedQuery, 'since'), 'until');
+      setQuery(updatedQuery);
+    } else if (days === null) {
+      // "All time" button
+      setDaysFacet(null);
+      setRange(null);
+      // Remove date filters from query
+      let updatedQuery = query;
+      updatedQuery = removeFilter(removeFilter(updatedQuery, 'after'), 'before');
+      updatedQuery = removeFilter(removeFilter(updatedQuery, 'since'), 'until');
+      setQuery(updatedQuery);
+    } else {
+      // Set the time range
+      setDaysFacet(days);
+      const end = new Date();
+      const start = new Date();
+      start.setDate(end.getDate() - days + 1);
+      const calculatedRange = { start, end };
+      setRange(calculatedRange);
+
+      // Update query string
+      let updatedQuery = query;
+      updatedQuery = removeFilter(removeFilter(updatedQuery, 'after'), 'before');
+      updatedQuery = removeFilter(removeFilter(updatedQuery, 'since'), 'until');
+      updatedQuery = addFilter(updatedQuery, 'after', formatDateForQuery(start));
+      updatedQuery = addFilter(updatedQuery, 'before', formatDateForQuery(end));
+      setQuery(updatedQuery);
+    }
+  }
+
   // Add/remove class to document to control footer visibility
   useEffect(() => {
     if (showFooter) {
@@ -608,44 +717,47 @@ export default function Home({ posts }: Props) {
                     <Button
                       variant={daysFacet === 7 ? "secondary" : "outline"}
                       size="sm"
-                      onClick={() => {
-                        setDaysFacet(daysFacet === 7 ? null : 7);
-                        setRange(null);
-                      }}
+                      onClick={() => handleQuickTime(7)}
                     >
                       Last 7d
                     </Button>
                     <Button
                       variant={daysFacet === 30 ? "secondary" : "outline"}
                       size="sm"
-                      onClick={() => {
-                        setDaysFacet(daysFacet === 30 ? null : 30);
-                        setRange(null);
-                      }}
+                      onClick={() => handleQuickTime(30)}
                     >
                       Last 30d
                     </Button>
                     <Button
                       variant={daysFacet === 90 ? "secondary" : "outline"}
                       size="sm"
-                      onClick={() => {
-                        setDaysFacet(daysFacet === 90 ? null : 90);
-                        setRange(null);
-                      }}
+                      onClick={() => handleQuickTime(90)}
                     >
                       Last 90d
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setDaysFacet(null);
-                        setRange(null);
-                      }}
+                      onClick={() => handleQuickTime(null)}
                     >
                       All time
                     </Button>
                   </div>
+
+                  {range && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <div className="text-xs text-muted-foreground mb-2">
+                        Selected Range:
+                      </div>
+                      <Pill
+                        variant="solid"
+                        className="cursor-pointer hover:bg-primary/80"
+                        onClick={() => handleQuickTime(null)}
+                      >
+                        {formatDateForQuery(range.start)} to {formatDateForQuery(range.end)}
+                      </Pill>
+                    </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
 
@@ -845,7 +957,7 @@ export default function Home({ posts }: Props) {
               <PostAreaInteractive
                 bins={bins}
                 selectedRange={range}
-                onRangeSelect={setRange}
+                onRangeSelect={handleRangeSelect}
               />
             </Panel>
           )}

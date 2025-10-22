@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Share2, MessageCircle } from "lucide-react";
+import { X, Share2, MessageCircle, FileText } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
 import { SITE_CONFIG } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -106,6 +106,22 @@ export function PostCTA({ title, slug }: PostCTAProps) {
               <Share2 className="h-4 w-4 mr-2" />
               Share this post
             </Button>
+
+            <a
+              href="https://github.com/irchaosclub/irchaosclub.github.io/wiki/How-to-publish"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full"
+            >
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                size="sm"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Get Published
+              </Button>
+            </a>
 
             <a
               href={SITE_CONFIG.links.discord}

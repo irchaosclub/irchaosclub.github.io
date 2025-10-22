@@ -27,6 +27,60 @@ export function parseQuery(raw: string): Query {
   return q;
 }
 
+// Helper to format date as YYYY-MM-DD
+export function formatDateForQuery(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+// Add a filter to a query string
+export function addFilter(query: string, key: string, value: string): string {
+  const parts = query.trim().split(/\s+/).filter(Boolean);
+  const filterToken = `${key}:${value}`;
+
+  // Don't add if already exists
+  if (parts.some(p => p.toLowerCase() === filterToken.toLowerCase())) {
+    return query;
+  }
+
+  return [...parts, filterToken].join(' ');
+}
+
+// Remove a filter from query string
+export function removeFilter(query: string, key: string, value?: string): string {
+  const parts = query.trim().split(/\s+/).filter(Boolean);
+
+  return parts
+    .filter(p => {
+      const m = p.match(/^(\w+):(.*)$/);
+      if (!m) return true; // Keep non-filter tokens
+
+      const [, k, v] = m;
+      if (k.toLowerCase() !== key.toLowerCase()) return true;
+
+      // If value specified, only remove exact match
+      if (value !== undefined) {
+        return v.toLowerCase() !== value.toLowerCase();
+      }
+
+      // If no value specified, remove all filters with this key
+      return false;
+    })
+    .join(' ');
+}
+
+// Toggle a filter (add if not present, remove if present)
+export function toggleFilter(query: string, key: string, value: string): string {
+  const parts = query.trim().split(/\s+/).filter(Boolean);
+  const filterToken = `${key}:${value}`;
+  const hasFilter = parts.some(p => p.toLowerCase() === filterToken.toLowerCase());
+
+  if (hasFilter) {
+    return removeFilter(query, key, value);
+  } else {
+    return addFilter(query, key, value);
+  }
+}
+
 export function matchesQuery(
   post: {
     title?: string;
