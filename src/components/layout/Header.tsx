@@ -28,6 +28,9 @@ export default function Header() {
             <Link href="/about" className="hover:underline">
               About
             </Link>
+            <Link href="/graph" className="hover:underline">
+              Graph
+            </Link>
             <a
               href={SITE_CONFIG.links.discord}
               target="_blank"
