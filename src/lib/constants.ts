@@ -5,7 +5,7 @@ export const SITE_CONFIG = {
   description: 'Incident Response Chaos Club - embracing the chaos of cybersecurity through DFIR, incident response, and security research.',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://irchaos.club',
   links: {
-    discord: 'https://discord.gg/hGPsPGMa',
+    discord: 'https://discord.gg/XcsjKAkqJQ',
     github: 'https://github.com/irchaosclub',
   },
 } as const;
