@@ -6,8 +6,7 @@ tags: ["incident response", "cloud", "azure"]
 description: "A hands-on walkthrough of rebuilding the Midnight Blizzard OAuth attack chain in Azure and developing an eviction plan for it."
 readingTime: 5
 ---
->[!Important]
-Disclaimer: My professional background is outside of cloud environments, and I am not an Azure SME. I built this lab and wrote this post as a hands-on exercise to teach myself cloud incident response and Azure identity mechanics. While there may be technical imperfections, this documents my learning journey into the complexities of OAuth and eviction strategies.
+> Disclaimer: My professional background is outside of cloud environments, and I am not an Azure SME. I built this lab and wrote this post as a hands-on exercise to teach myself cloud incident response and Azure identity mechanics. While there may be technical imperfections, this documents my learning journey into the complexities of OAuth and eviction strategies.
 
 The Midnight Blizzard attack is a stark case study in how threat actors leverage compromised OAuth applications for persistent access. While analyzing the breach, I wanted to better understand the specific mechanics required to remove an adversary once they've established this level of control; so I rebuilt the attack chain in an Azure lab environment.
 
@@ -19,8 +18,7 @@ Rather than rehash the full attack chain here, the Wiz breakdown is worth readin
 
 The important thing to understand going into the eviction plan is that by the end of the attack chain, the threat actor has two independent paths into the production environment: the legacy test app with broad MS Graph permissions, and the malicious exfil app with `full_access_as_app` on Exchange. Both footholds have to be addressed, and how you address them, and in what order, is what the rest of this post is about.
 
-> [!NOTE]
-The one deviation from the original attack: since I don't have mailboxes to exfil from, I swapped `full_access_as_app` for `User.Read.All` on the malicious exfil app. It's a different target, but the mechanics are identical, an overprivileged app using a bearer token to pull data it shouldn't have access to.
+> The one deviation from the original attack: since I don't have mailboxes to exfil from, I swapped `full_access_as_app` for `User.Read.All` on the malicious exfil app. It's a different target, but the mechanics are identical, an overprivileged app using a bearer token to pull data it shouldn't have access to.
 
 
 ## Why Sequencing Is Everything
@@ -33,13 +31,13 @@ The intuitive response when you discover a malicious app exfiltrating data is to
 
 In my lab, I simulated an active exfiltration session using a valid bearer token obtained by the malicious exfil app. This app was registered in my `legacy-test` tenant with `User.Read.All` permissions, and the rogue `backupadmin` account in my prod tenant granted it consent giving it direct access to prod data. To demonstrate secret rotation, I deleted the client secret entirely so there's no ambiguity: the credential is gone, and we'll see whether that stops anything.
 
-![Bearer token obtained, User.Read.All and Mail.Read permissions](/images/analyzing-the-midnight-blizzard-eviction-path/token-pre-secret-rotation.png)
+![Bearer token obtained, User.Read.All and Mail.Read permissions](/images/analyzing-the-midnight-blizzard-eviction-plan/token-post-secret-rotation.png)
 
-![Secret deleted from malicious exfil app](/images/analyzing-the-midnight-blizzard-eviction-path/malicious-exfil-app-no-secrets.png)
+![Secret deleted from malicious exfil app](/images/analyzing-the-midnight-blizzard-eviction-plan/malicious-exfil-app-no-secrets.png)
 
 It didn't stop anything. The bearer token was still valid. The attacker can no longer request new tokens once the secret is gone, but the existing token continues to work until it naturally expires. During that entire window, exfiltration continues uninterrupted. Worse, the attacker still has access to the `legacy-test` tenant and could rotate the secret themselves to mint a fresh token, putting you right back to square one.
 
-![Post secret rotation my token still has User.Read.All permissions in the prod tenant](/images/analyzing-the-midnight-blizzard-eviction-path/token-post-secret-rotation.png)
+![Post secret rotation my token still has User.Read.All permissions in the prod tenant](/images/analyzing-the-midnight-blizzard-eviction-plan/token-post-secret-rotation.png)
 
 This is the gap that gets organizations into trouble. They see a mitigation action complete successfully and assume the threat is neutralized, when in reality the attacker is still live.
 
@@ -47,9 +45,9 @@ This is the gap that gets organizations into trouble. They see a mitigation acti
 
 This time I started by disabling the `malicious-exfil-app` Service Principal in the prod tenant before touching anything else. Almost immediately after disabling the Service Principal, my Graph API request to "exfil" data fails.
 
-![malicious-exfil-app Service Principal disabled in prod tenant](/images/analyzing-the-midnight-blizzard-eviction-path/malicious-exfil-app-prod-sp-disabled.png)
+![malicious-exfil-app Service Principal disabled in prod tenant](/images/analyzing-the-midnight-blizzard-eviction-plan/malicious-exfil-app-prod-sp-disabled.png)
 
-![Exfil attempt fails](/images/analyzing-the-midnight-blizzard-eviction-path/malicious-exfil-app-prod-sp-disabled-token-revoked.png)
+![Exfil attempt fails](/images/analyzing-the-midnight-blizzard-eviction-plan/malicious-exfil-app-prod-sp-disabled-token-revoked.png)
 
 
 Exfiltration is stopped, but the attacker still has a persistent rogue admin in the prod tenant and access to the `legacy-test` tenant, which they could use to deploy another malicious app and re-consent it in prod within minutes. This is why the remaining steps need to be executed quickly and in order:
