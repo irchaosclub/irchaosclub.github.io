@@ -45,5 +45,19 @@ export const PEOPLE: Person[] = [
       website: "https://blog.dingusxmcgee.com",
       mastodon: "https://infosec.exchange/@dingusxmcgee"
     },
-  }
+  },
+  {
+    name: "alphaf0x",
+    role: "Detection Engineer | Security Operations",
+    bio:
+      "Enterprise security practitioner specialising in detection engineering, threat hunting, and incident response." +
+      "Passionate about electronic music, underground internet communities and their culture." +
+      "Moderator @ IRCC :3",
+    links: {
+      website: "https://alphaf0x.com",
+      email: "mailto:ping@alphaf0x.com",
+      github: "https://github.com/alphaf0x",
+      twitter: "https://x.com/alphaf0x1",
+    },
+    }
 ];
