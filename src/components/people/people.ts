@@ -59,5 +59,15 @@ export const PEOPLE: Person[] = [
       github: "https://github.com/alphaf0x",
       twitter: "https://x.com/alphaf0x1",
     },
+    },
+    {
+    name: "jbugz",
+    role: "Vulnerability Management | Incident Responder",
+    bio:
+      "Fighting in almost all fronts: CloudSec, SOC, Servers and Endpoints." +
+      "Moderator @ IRCC :3",
+    links: {
+       github: "https://github.com/bugsandjohn"
+    },
     }
 ];
